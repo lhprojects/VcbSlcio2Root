@@ -63,7 +63,12 @@ _output(0)
                              "the final state particle after simulation",
                              _outmcpsimufsp,
                              std::string("ReconstructedParticle") );
-    
+
+    registerOutputCollection( LCIO::RECONSTRUCTEDPARTICLE,
+                            "MCPSIMUFSP2",
+                            "the final state particle after simulation",
+                            _outmcpsimufsp2,
+                            std::string("ReconstructedParticle") );
     
     registerOutputCollection( LCIO::LCRELATION,
                              "mcpsimurelation",
@@ -71,6 +76,12 @@ _output(0)
                              _outMCPSIMURelation,
                              std::string("RelationusedSed") );
     
+        registerOutputCollection( LCIO::LCRELATION,
+                             "mcpsimurelation2",
+                             " relation between MCP and Reco after simulation",
+                             _outMCPSIMURelation2,
+                             std::string("RelationusedSed") );
+
     _overwrite=0;
     registerProcessorParameter( "OverwriteFile" ,
                                "If zero an already existing file will not be overwritten." ,
@@ -82,214 +93,198 @@ _output(0)
 
 
 
+// from large to small
+struct SortEn {
+    bool operator()(ReconstructedParticle const * a1, ReconstructedParticle const * a2) const{
+        return a1->getEnergy() > a2->getEnergy();
+    }
+};
 
-static bool sortEn(ReconstructedParticle* a1, ReconstructedParticle* a2){
-    return a1->getEnergy() >= a2->getEnergy();
-}
+static SortEn sortEn;
 
-void vcb::init() {
-    
+void vcb::init() {    
     printParameters();
-//    TFile *tree_file=new TFile(_treeFileName.c_str(),(_overwrite ? "RECREATE" : "UPDATE"));
-//    if (!tree_file->IsOpen()) {
-//        delete tree_file;
-//        tree_file=new TFile(_treeFileName.c_str(),"NEW");
-//    }
-    
-//    _outputTree = new TTree(_treeName.c_str(),_treeName.c_str());
-//    _outputTree->SetAutoSave(32*1024*1024);  // autosave every 32MB
-//    _outputTree->Branch("EventNr",     &eventNr,       "EventNr/I");
-//    _outputTree->Branch("Num",         &Num,           "Num/I");
-//    _outputTree->Branch("visEn",        &visEn,         "visEn/D");
-//    _outputTree->Branch("multiplicity", &multiplicity,  "multiplicity/I");
-//    _outputTree->Branch("LeadElecEn",   &LeadElecEn,    "LeadElecEn/D");
-//    _outputTree->Branch("leadMuonEn",   &leadMuonEn,    "leadMuonEn/D");
-//    _outputTree->Branch("subleadMuonEn",   &subleadMuonEn,    "subleadMuonEn/D");
-//    _outputTree->Branch("ratio",    &ratio,    "ratio/D");
-
-
- 
     Num = 0;
 }
+
+
+ReconstructedParticle *clone(ReconstructedParticle * pfo)
+{
+    if(false) {
+        // yong feng's code seems also working
+        ReconstructedParticleImpl* a_Reco = new ReconstructedParticleImpl();
+        a_Reco->addParticle(pfo);
+        a_Reco->setEnergy( pfo->getEnergy() );
+        a_Reco->setMomentum( pfo->getMomentum() );
+        a_Reco->setType( pfo->getType() );
+        if( pfo->getTracks().size() ){
+            a_Reco->addTrack(pfo->getTracks()[0]);
+        }
+        
+        a_Reco->setCharge(pfo->getCharge());
+        a_Reco->setCovMatrix(pfo->getCovMatrix());
+        if(pfo->getClusters().size()){
+            for(unsigned j = 0; j<pfo->getClusters().size(); j++){
+                a_Reco->addCluster( pfo->getClusters()[j] );
+            }
+        }
+        return a_Reco;
+    } else if(false) {
+        ReconstructedParticleImpl* a_Reco = new ReconstructedParticleImpl();
+        // fields: need to copy
+        // int _type{0} ;
+        // double _momentum[3] = {0.,0.,0.} ;
+        // double _energy{0.} ;
+        // EVENT::FloatVec _cov{} ;
+        // double _mass{0.} ;
+        // float _charge{} ;
+        // float _reference[3] = {0.,0.,0.}  ;
+        // EVENT::ParticleID* _pidUsed{ NULL} ;
+        // float _goodnessOfPID{0.} ;
+        // EVENT::ParticleIDVec _pid{} ;
+        // EVENT::ReconstructedParticleVec _particles{} ;
+        // EVENT::ClusterVec _clusters{} ;
+        // EVENT::TrackVec _tracks{} ;
+        // EVENT::Vertex* _sv{} ;
+
+
+        a_Reco->setType( pfo->getType() );
+        a_Reco->setMomentum( pfo->getMomentum() );
+        a_Reco->setEnergy( pfo->getEnergy() );
+        a_Reco->setCovMatrix(pfo->getCovMatrix());
+        a_Reco->setMass(pfo->getMass());
+        a_Reco->setCharge(pfo->getCharge());
+        a_Reco->setReferencePoint (pfo->getReferencePoint());
+        a_Reco->setParticleIDUsed(pfo->getParticleIDUsed());
+        a_Reco->setGoodnessOfPID(pfo->getGoodnessOfPID());
+        
+        for(unsigned i = 0; i < pfo->getParticleIDs().size(); ++i) {
+            a_Reco->addParticleID(pfo->getParticleIDs()[i]);
+        }
+
+        for(unsigned i = 0; i < pfo->getParticles().size(); ++i) {
+            a_Reco->addParticle(pfo->getParticles()[i]);
+        }
+
+        for(unsigned i = 0; i < pfo->getClusters().size(); ++i) {
+            a_Reco->addCluster(pfo->getClusters()[i]);
+        }
+
+        for(unsigned i = 0; i < pfo->getTracks().size(); ++i) {
+            a_Reco->addTrack(pfo->getTracks()[i]);
+        }
+        a_Reco->setStartVertex(a_Reco->getStartVertex());
+
+        return a_Reco;
+    } else{
+        // do we really need to copy the obj?
+        return pfo;
+    }
+}
+
+struct Copy {
+
+    LCCollectionVec* otmcpsimufsp;
+    LCCollectionVec* otMCPSIMURelation;
+    LCFlagImpl newMCPSIMUlinkflag;
+    std::string _outmcpsimufsp;
+    std::string _outMCPSIMURelation;
+    int NumPart;
+
+    Copy(std::string _outmcpsimufsp, std::string _outMCPSIMURelation) :
+        _outmcpsimufsp(_outmcpsimufsp),
+        _outMCPSIMURelation(_outMCPSIMURelation) {
+
+        otmcpsimufsp = new LCCollectionVec( LCIO::RECONSTRUCTEDPARTICLE );
+        otMCPSIMURelation = new LCCollectionVec( LCIO::LCRELATION );
+        newMCPSIMUlinkflag.setBit(LCIO::CHBIT_LONG);
+        otMCPSIMURelation->setFlag(newMCPSIMUlinkflag.getFlag());
+        NumPart = 0;
+    }
+
+    void addPart(ReconstructedParticle *pfo) {
+        //pfo = clone(pfo);
+        ReconstructedParticle *a_Reco = clone(pfo);
+        otmcpsimufsp->addElement(a_Reco );
+        LCRelationImpl *newrel = new LCRelationImpl(a_Reco, pfo, 1.0);
+        otMCPSIMURelation->addElement( newrel );
+        NumPart += 1;
+    }
+
+    void added2Evt(LCEvent * evtP) {
+
+        printf("%d parts added to %s\n", NumPart, _outmcpsimufsp.c_str());
+        evtP->addCollection(otmcpsimufsp, _outmcpsimufsp.c_str() );
+        evtP->addCollection(otMCPSIMURelation, _outMCPSIMURelation.c_str() );
+    }
+
+};
 
 void vcb::processEvent( LCEvent * evtP )
 {
     
-    
-    LCCollectionVec* otmcpsimufsp = new LCCollectionVec( LCIO::RECONSTRUCTEDPARTICLE );
-    LCCollectionVec* otMCPSIMURelation = new LCCollectionVec( LCIO::LCRELATION );
-    LCFlagImpl newMCPSIMUlinkflag;
-    newMCPSIMUlinkflag.setBit(LCIO::CHBIT_LONG);
-    otMCPSIMURelation->setFlag(newMCPSIMUlinkflag.getFlag());
-    
     if (evtP)
     {
-        try{
+        Copy exclMuon(_outmcpsimufsp, _outMCPSIMURelation);
+        Copy exclElec(_outmcpsimufsp2, _outMCPSIMURelation2);
+
+        try {
             
-            cout<<"Next Event *******************************************************************************************************"<<endl;
-//            eventNr = evtP->getEventNumber();
-//            cout<<"eventNr : "<<eventNr<<" Num : "<<Num<<endl;
-            
-            //ArborPFOs
             LCCollection* col_PFO = evtP->getCollection( "ArborPFOs" );
             int nPFO = col_PFO->getNumberOfElements();
-            cout<<"nPFO : "<<nPFO<<endl;
-            TLorentzVector TLPFO(0,0,0,0);
+            cout<<"nPFO : "<< nPFO <<endl;
             
             
-            std::vector<ReconstructedParticle*> vElec;      vElec.clear();
-            std::vector<ReconstructedParticle*> vMuon;      vMuon.clear();
+            std::vector<ReconstructedParticle*> vElec;
+            std::vector<ReconstructedParticle*> vMuon;
 
-            for(int i = 0; i<nPFO; i++){
+            for(int i = 0; i < nPFO; i++) {
                 ReconstructedParticle* pfo = dynamic_cast<ReconstructedParticle*>(col_PFO->getElementAt(i));
-                TLorentzVector temp(pfo->getMomentum(), pfo->getEnergy());
-                TVector3 TVtemp = temp.Vect();
-                TLPFO += temp;
+                
                 int type = abs(pfo->getType());
-                if(type == 11){vElec.push_back(pfo);}
-                if(type == 13){vMuon.push_back(pfo);}
-                else{
-                    ReconstructedParticleImpl* a_Reco = new ReconstructedParticleImpl();
-                    a_Reco->addParticle(pfo);
-                    a_Reco->setEnergy( pfo->getEnergy() );
-                    a_Reco->setMomentum( pfo->getMomentum() );
-                    a_Reco->setType( pfo->getType() );
-                    if( pfo->getTracks().size() ){
-                        a_Reco->addTrack(pfo->getTracks()[0]);
-                    }
-                    
-                    a_Reco->setCharge(pfo->getCharge());
-                    a_Reco->setCovMatrix(pfo->getCovMatrix());
-                    if(pfo->getClusters().size()){
-                        for(int j = 0; j<pfo->getClusters().size(); j++){
-                            a_Reco->addCluster( pfo->getClusters()[j] );
-                        }
-                    }
-                    otmcpsimufsp->addElement( a_Reco );
-                    LCRelationImpl *newrel = new LCRelationImpl(a_Reco, pfo, 1.0);
-                    otMCPSIMURelation->addElement( newrel );
-                }
-                
-                
+                if(type == 11){ vElec.push_back(pfo); }
+                if(type == 13){ vMuon.push_back(pfo); }
+                else {
+                    exclMuon.addPart(pfo);
+                    exclElec.addPart(pfo);
+                } 
             }
             
-            cout<<"the total energy of ArborPFOs is : "<<TLPFO.E()<<endl;
-//            TVector3 TVPFO = TLPFO.Vect();
-//            Pt = TVPFO.Perp();
-//            Pl = pow(TVPFO.Mag2() - TVPFO.Perp2(), 0.5);
 
-
+            std::sort(vElec.begin(), vElec.end(), sortEn);
+            std::sort(vMuon.begin(), vMuon.end(), sortEn);
             
-            
-           
-                
-            //the following code used to analysis the multiplicity information of final state particles
-//            visEn = 0; multiplicity = 0;
-//            visEn = TLPFO.E();
-//            multiplicity = nPFO;
-            
-//            double leadMuonEn = 0, LeadElecEn = 0, subleadMuonEn = 0, ratio = 0;
-            
-
-            
-//            sort(vElec.begin(), vElec.end(), sortEn);
-//            sort(vMuon.begin(), vMuon.end(), sortEn);
-//            
-//
-//            ReconstructedParticle* leadMuon = NULL;
-//            ReconstructedParticle* leadElec = NULL;
-//            if(vMuon.size() > 0){
-//                leadMuon = vMuon.at(0);
-// //               leadMuonEn = leadMuon->getEnergy();
-//                
-//                TLorentzVector TLseedMuon(leadMuon->getMomentum(), leadMuon->getEnergy());
-//                TVector3 TVseedMuon = TLseedMuon.Vect();
-//                
-//                TLorentzVector TLaround(0, 0, 0, 0);
-//                for(int i = 0; i<nPFO; i++){
-//                    ReconstructedParticle* pfo = dynamic_cast<ReconstructedParticle*>(col_PFO->getElementAt(i));
-//                    TLorentzVector temp(pfo->getMomentum(), pfo->getEnergy());
-//                    TVector3 TVtemp = temp.Vect();
-//                    
-//                    if(pfo != leadMuon){
-//                        if( TVtemp.Angle(TVseedMuon) < 0.5 ){ TLaround += temp; }
-//                    }
-//                    
-//                }
-//                
-//                ratio = leadMuon->getEnergy()/( TLaround.E() + leadMuon->getEnergy() );
-//                
-//                if(vMuon.size() > 1){
-//                    ReconstructedParticle* subleadMuon = vMuon.at(1);
-//                    subleadMuonEn = subleadMuon->getEnergy();
-//                }
-//            }
-//            
-//            if(vElec.size() > 0){
-//                leadElec = vElec.at(0);
-//                LeadElecEn = leadElec->getEnergy();
-//            }
-//            
-//       
-            
-            if(vMuon.size() > 1){
-                for(int i = 1; i<vMuon.size(); i++){
-                    ReconstructedParticle* pfo = vMuon.at(i);
-                    ReconstructedParticleImpl* a_Reco = new ReconstructedParticleImpl();
-                    a_Reco->addParticle(pfo);
-                    a_Reco->setEnergy( pfo->getEnergy() );
-                    a_Reco->setMomentum( pfo->getMomentum() );
-                    a_Reco->setType( pfo->getType() );
-                    if( pfo->getTracks().size() ){
-                        a_Reco->addTrack(pfo->getTracks()[0]);
-                    }
-                    
-                    a_Reco->setCharge(pfo->getCharge());
-                    a_Reco->setCovMatrix(pfo->getCovMatrix());
-                    if(pfo->getClusters().size()){
-                        for(int j = 0; j<pfo->getClusters().size(); j++){
-                            a_Reco->addCluster( pfo->getClusters()[j] );
-                        }
-                    }
-                    otmcpsimufsp->addElement( a_Reco );
-                    LCRelationImpl *newrel = new LCRelationImpl(a_Reco, pfo, 1.0);
-                    otMCPSIMURelation->addElement( newrel );
+            for (int i = 0; i < (int)vMuon.size(); i++)
+            {
+                ReconstructedParticle *pfo = vMuon.at(i);
+                if(i != 0) {
+                    exclMuon.addPart(pfo);
                 }
+                exclElec.addPart(pfo);                
             }
-            
-            cout<<"nPFO : "<<nPFO<<" vMuon.size() : "<<vMuon.size()<<endl;
-            cout<<"otmcpsimufsp->getNumberOfElements() : "<<otmcpsimufsp->getNumberOfElements()<<endl;
-            cout<<"otMCPSIMURelation->getNumberOfElements() : "<<otMCPSIMURelation->getNumberOfElements()<<endl;
-            
 
-        }catch (lcio::DataNotAvailableException err) {  }
+            for (int i = 0; i < (int)vElec.size(); i++)
+            {
+                ReconstructedParticle *pfo = vElec.at(i);
+                if(i != 0) {
+                    exclElec.addPart(pfo);
+                }
+                exclMuon.addPart(pfo);  
+            }           
 
+            exclMuon.added2Evt(evtP);
+            exclElec.added2Evt(evtP);
+
+        } catch (lcio::DataNotAvailableException err) {
+            printf("process %dth event error", Num);
+        }
     }
     
-    evtP->addCollection( otmcpsimufsp, _outmcpsimufsp.c_str() );
-    evtP->addCollection( otMCPSIMURelation, _outMCPSIMURelation.c_str() );
-    
-//    _outputTree->Fill();
-    Num ++;
+    Num++;
 }
-
-
 
 void vcb::end()
-{
-    
-    if (_outputTree) {
-        
-        TFile *tree_file = _outputTree->GetCurrentFile(); //just in case we switched to a new file
-        //tree_file->cd();
-        tree_file->Write();
-        delete tree_file;
-        //tree_file->Close();
-    }
-    
+{    
 }
-
-
-
 
 

@@ -63,6 +63,8 @@ class vcb  : public marlin::Processor
     
         std::string _outmcpsimufsp;
         std::string _outMCPSIMURelation;
+        std::string _outmcpsimufsp2;
+        std::string _outMCPSIMURelation2;
     
 		std::string _fileName;
 		std::ostream *_output;
