@@ -77,11 +77,13 @@ _output(0)
     
 }
 
+// is B-bar hadron
 int ISBbar(int mc){
     if(mc == 511 || mc == 521 || mc == 10511 || mc == 10521 || mc == 513 || mc == 523 || mc == 10513 || mc == 10523 || mc == 20513 || mc == 20523 || mc == 515 || mc == 525 || mc == 531 || mc == 10531 || mc == 533 || mc == 10533 || mc == 20533 || mc == 535 || mc == 541 || mc == 10541 || mc == 543 || mc == 10543 || mc == 20543 || mc == 545 || mc == -5122 || mc == -5112 || mc == -5212 || mc == -5222 || mc == -5114 || mc == -5214 || mc == -5224 || mc == -5132 || mc == -5232 || mc == -5312 || mc == -5322 || mc == -5314 || mc == -5324 || mc == -5332 || mc == -5334 || mc == -5142 || mc == -5242 || mc == -5412 || mc == -5422 || mc == -5414 || mc == -5424 || mc == -5342 || mc == -5432 || mc == -5434 || mc == -5442 || mc == -5444 || mc == -5512 || mc == -5522 || mc == -5514 || mc == -5524 || mc == -5532 || mc == -5534 || mc == -5542 || mc == -5544 || mc == -5544 ) {return 1;}
     else {return 0;}
 }
 
+// Is B hadron
 int ISB(int mc){
     if(mc == -511 || mc == -521 || mc == -10511 || mc == -10521 || mc == -513 || mc == -523 || mc == -10513 || mc == -10523 || mc == -20513 || mc == -20523 || mc == -515 || mc == -525 || mc == -531 || mc == -10531 || mc == -533 || mc == -10533 || mc == -20533 || mc == -535 || mc == -541 || mc == -10541 || mc == -543 || mc == -10543 || mc == -20543 || mc == -545 || mc == 5122 || mc == 5112 || mc == 5212 || mc == 5222 || mc == 5114 || mc == 5214 || mc == 5224 || mc == 5132 || mc == 5232 || mc == 5312 || mc == 5322 || mc == 5314 || mc == 5324 || mc == 5332 || mc == 5334 || mc == 5142 || mc == 5242 || mc == 5412 || mc == 5422 || mc == 5414 || mc == 5424 || mc == 5342 || mc == 5432 || mc == 5434 || mc == 5442 || mc == 5444 || mc == 5512 || mc == 5522 || mc == 5514 || mc == 5524 || mc == 5532 || mc == 5534 || mc == 5542 || mc == 5544 || mc == 5544 ) {return 1;}
     else {return 0;}
@@ -122,16 +124,15 @@ vector<int> DifferenceSet(vector<int> total, vector<int> original, vector<int> l
 }
 std::vector<vector<int> > pair4jets(int numjets);
 
+// from large to small
 static bool sortEn(ReconstructedParticle* a1, ReconstructedParticle* a2){
     return a1->getEnergy() >= a2->getEnergy();
 }
 
+// from large to small
 static bool sortEnMC(MCParticle* a1, MCParticle* a2){
     return a1->getEnergy() >= a2->getEnergy();
 }
-
-void CalcuThrust(std::vector<TLorentzVector > UsedForThrust, std::vector<double> &result);
-
 
 void vcb2::init() {
     
@@ -181,6 +182,35 @@ void vcb2::init() {
     Num = 0;
 }
 
+
+bool isQuark(int pdg) {
+    return abs(PDG) == 1 || abs(PDG) == 2 || abs(PDG) == 3 || abs(PDG) == 4 || abs(PDG) == 5 || abs(PDG) == 6;
+}
+
+void getYs(LCEvent * evtP, int &Y12, int &Y23, int &Y34)
+{
+    Y12 = 999, Y23 = 999, Y34 = 999;
+
+    LCCollection* col_Jet = evtP->getCollection( "RefinedJets" );
+    int num_jet = col_Jet->getNumberOfElements();
+    cout<<"num_jet : "<<num_jet<<endl;
+    
+    if(num_jet == 2) {
+        PIDHandler pidh(col_Jet);
+        int algo   = 0;
+        algo = pidh.getAlgorithmID("yth");
+        int iy12 = -1, iy23 = -1, iy34 = -1;
+        iy12 = pidh.getParameterIndex (algo, "y12" );
+        iy23 = pidh.getParameterIndex (algo, "y23" );
+        iy34 = pidh.getParameterIndex (algo, "y34" );
+        ReconstructedParticle* jet = dynamic_cast<ReconstructedParticle*>(col_Jet->getElementAt(0));
+        const ParticleID &pid = pidh.getParticleID(jet, algo);
+        Y12 = pid.getParameters()[iy12];
+        Y23 = pid.getParameters()[iy23];
+        Y34 = pid.getParameters()[iy34];
+    }    
+}
+
 void vcb2::processEvent( LCEvent * evtP )
 {
     
@@ -205,46 +235,35 @@ void vcb2::processEvent( LCEvent * evtP )
                 TLorentzVector temp(pfo->getMomentum(), pfo->getEnergy());
                 vArborTL.push_back(temp);
             }
-            
-            thrust = 999;
-            std::vector<double> shape1Result; shape1Result.clear();
-            CalcuThrust(vArborTL, shape1Result);
-            thrust = shape1Result.at(0);
 
-            std::vector<MCParticle*> quarkvec; quarkvec.clear();
+            // quark list ...
+            std::vector<MCParticle*> quarkvec;
             LCCollection* col_MCP = evtP->getCollection( "MCParticle" );
-            int n_MCP = col_MCP->getNumberOfElements();
+            int const n_MCP = col_MCP->getNumberOfElements();
             
-            std::vector<MCParticle*> v92Daus;      v92Daus.clear();
+            std::vector<MCParticle*> v92Daus;
 
 //            std::map<MCParticle*, float> mapMCcount; mapMCcount.clear();
             
-            for(int i = 0; i<n_MCP; i++)
+            for(int i = 0; i < n_MCP; i++)
             {
                 MCParticle* a_MCP = dynamic_cast<MCParticle*>(col_MCP->getElementAt(i));
-                int NParents      = a_MCP->getParents().size();
-                int NDaughters    = a_MCP->getDaughters().size();
-                int PDG           = a_MCP->getPDG();
+                int const NParents      = a_MCP->getParents().size();
+                int const NDaughters    = a_MCP->getDaughters().size();
+                int const PDG           = a_MCP->getPDG();
                 
 
                 
-                if(NParents == 0 && (abs(PDG) == 1 || abs(PDG) == 2 || abs(PDG) == 3 || abs(PDG) == 4 || abs(PDG) == 5 || abs(PDG) == 6) ){
+                if(NParents == 0 && isQuark(PDG) ) {
                     quarkvec.push_back(a_MCP);
                 }
                 
-                if(PDG == 92){
-                    cout<<"92...."<<endl;
-                    for(int j = 0; j<NDaughters; j++){
+                if(PDG == 92) {
+                    for(int j = 0; j < NDaughters; j++){
                         MCParticle* mcp_92Dau = a_MCP->getDaughters()[j];
                         int tempPDG = mcp_92Dau->getPDG();
-                        if(ISB(tempPDG) == 1 || ISBbar(tempPDG) == 1){
-//                            mapMCcount[mcp_92Dau] = float;
-                            cout<<"92 B daughters ..."<<tempPDG<<" mcp_92Dau->getEnergy() : "<<mcp_92Dau->getEnergy()<<endl;
-//                            if( std::find(v92Daus.begin(), v92Daus.end(), mcp_92Dau) == v92Daus.end() ){
-//                                v92Daus.push_back(mcp_92Dau);
-//                            }
-                            
-                            if(v92Daus.size() == 0){ v92Daus.push_back(mcp_92Dau); }
+                        if(ISB(tempPDG) == 1 || ISBbar(tempPDG) == 1) {                            
+                            if(v92Daus.size() == 0) { v92Daus.push_back(mcp_92Dau); }
                             else{
                                 int count = 0;
                                 for(int k = 0; k<v92Daus.size(); k++){
@@ -262,10 +281,7 @@ void vcb2::processEvent( LCEvent * evtP )
                 
                 
             }
-            
-            
- //           cout<<"mapMCcount.size() : "<<mapMCcount.size()<<endl;
-            
+                        
             for(int i = 0; i<4; i++){
                 jet14m[i] = 999;
                 jet24m[i] = 999;
@@ -290,8 +306,6 @@ void vcb2::processEvent( LCEvent * evtP )
             MCParticle* lead1LeadHad = NULL; MCParticle* lead2LeadHad = NULL;
             num_92BDaus = 0; num_92BDaus = v92Daus.size();
             cout<<"num_92BDaus : "<<num_92BDaus<<endl;
-//            std::vector<MCParticle*> lead1Daus; lead1Daus.clear();
-//            std::vector<MCParticle*> lead2Daus; lead2Daus.clear();
             
             if(v92Daus.size() > 1){
                 lead1 = v92Daus.at(0);
@@ -320,37 +334,12 @@ void vcb2::processEvent( LCEvent * evtP )
                         if(ISB(DauPDG) == 1 || ISBbar(DauPDG) == 1){ lead2 = Dau; stop += 1;}
                     }
                 }
-//                if(stop == 0 ){ lead2LeadHad = lead2; }
                 
 
                 cout<<"lead1LeadHad->getPDG() : "<<lead1->getPDG()<<" : "<<lead2->getPDG()<<endl;
-                
-                
-//                for(int i = 0; i<n_MCP; i++)
-//                {
-//                    MCParticle* a_MCP = dynamic_cast<MCParticle*>(col_MCP->getElementAt(i));
-//                    int NParents      = a_MCP->getParents().size();
-//                    int PDG           = a_MCP->getPDG();
-//                    
-//                    MCParticle* a_parent = a_MCP;
-//                    if(abs(PDG) != 12 && abs(PDG) != 14 && abs(PDG) != 16 && abs(PDG) != 11 && abs(PDG) != 13 && abs(PDG) != 15 && abs(PDG) != 22 && a_MCP->getGeneratorStatus() == 1 ){
-//                        while( a_parent->getParents().size() != 0 && a_parent != lead1 && a_parent != lead2 ){
-//                            a_parent = a_parent->getParents()[0];
-//                        }
-//                        if( a_parent == lead1 ){lead1Daus.push_back(a_MCP);}
-//                        else if(a_parent == lead2){lead2Daus.push_back(a_MCP);}
-//                    }
-//                }
+                            
             }
-            
-        
-
-
-            
-            
-            
-            
-            
+                
             
             
             quark1PDG = 999, quark2PDG = 999;
@@ -373,6 +362,7 @@ void vcb2::processEvent( LCEvent * evtP )
             }
             
             
+            getYs(evtP, Y12, Y23, Y34);
             
             for(int i = 0; i<2; i++){
                 HbbL[i] = 999;
@@ -380,34 +370,15 @@ void vcb2::processEvent( LCEvent * evtP )
             }
             
 
-
-            LCCollection* col_Jet = evtP->getCollection( "RefinedJets" );
-            int num_jet = col_Jet->getNumberOfElements();
-            cout<<"num_jet : "<<num_jet<<endl;
-            
-            Y12 = 999, Y23 = 999, Y34 = 999;
-            if(num_jet == 2){
-                PIDHandler pidh(col_Jet);
-                int algo   = 0;
-                algo = pidh.getAlgorithmID("yth");
-                int iy12 = -1, iy23 = -1, iy34 = -1;
-                iy12 = pidh.getParameterIndex (algo, "y12" );
-                iy23 = pidh.getParameterIndex (algo, "y23" );
-                iy34 = pidh.getParameterIndex (algo, "y34" );
-                ReconstructedParticle* jet = dynamic_cast<ReconstructedParticle*>(col_Jet->getElementAt(0));
-                const ParticleID &pid = pidh.getParticleID(jet, algo);
-                Y12 = pid.getParameters()[iy12];
-                Y23 = pid.getParameters()[iy23];
-                Y34 = pid.getParameters()[iy34];
-            }
             
 //            jet1LeadHadEnRatio = 0, jet2LeadHadEnRatio = 0;
             lead1HadEn = 0, lead2HadEn = 0;
             
-            for(int i = 0; i<3; i++){
+            for(int i = 0; i < 3; i++){
                 lead1EndP[i] = 999;
                 lead2EndP[i] = 999;
             }
+
             lead1PID = 999, lead2PID = 999;
   
             if(num_jet == 2){
@@ -539,7 +510,7 @@ void vcb2::processEvent( LCEvent * evtP )
                 cout<<"lead2EndP[i] : "<<lead2EndP[i]<<endl;
             }
             
-            cout<<"lead1PID : "<<lead1PID<<" lead2PID : "<<lead2PID<<endl;
+            cout<<"lead1PID : "<< lead1PID <<" lead2PID : "<<lead2PID<<endl;
             
 
         }catch (lcio::DataNotAvailableException err) {  }
@@ -565,163 +536,5 @@ void vcb2::end()
     }
     
 }
-
-
-void CalcuThrust(std::vector<TLorentzVector > UsedForThrust, std::vector<double> &result){
-    result.clear();
-    double T = 0;
-    //the following code used to find the thrust
-    double thetaMin = TMath::Pi(), phiMin = 2*TMath::Pi();
-    double thetaMin2 = 0, phiMin2 = 0;
-    double thetaL = 0, phiL = 0, thetaR = TMath::Pi(), phiR = 2*TMath::Pi();
-    int iter = 0;
-    double Told = 0;
-    double Tnew = 0;
-    double cut = 1;
-    double thetaRange = 0, phiRange = 0;
-    do{
-        iter += 1;
-        //        cout<<"iter : "<<iter<<endl;
-        if(iter == 1){
-            thetaRange = thetaR - thetaL, phiRange = phiR - phiL;
-        }
-        else if(iter != 1){
-            
-            thetaRange = 0.1*(thetaR - thetaL);
-            phiRange = 0.1*(phiR - phiL);
-            
-            thetaL =  thetaMin - thetaRange;
-            thetaR = thetaMin + thetaRange;
-            phiL = phiMin - phiRange;
-            phiR = phiMin + phiRange;
-            thetaRange = thetaR - thetaL, phiRange = phiR - phiL;
-            
-            //            cout<<"thetaL : "<<thetaL<<" thetaR : "<<thetaR<<endl;
-            //            cout<<"phiL : "<<phiL<<" phiR : "<<phiR<<endl;
-        }
-        //        cout<<"thetaRange : "<<thetaRange<<" phiRange : "<<phiRange<<endl;
-        for(double theta = thetaL; theta <= thetaR; theta += 0.1*thetaRange){   //in this round, find the max T
-            for(double phi = phiL; phi <= phiR; phi += 0.1*phiRange){
-                
-                double x = sin(theta)*cos(phi);
-                double y = sin(theta)*sin(phi);
-                double z = cos(theta);
-                
-                double denominator = 0;
-                double numerator = 0;
-                for(int i = 0; i<UsedForThrust.size(); i++){
-                    TLorentzVector TLtemp = UsedForThrust.at(i);
-                    //                    TLorentzVector TLtemp(temp->getMomentum(), temp->getEnergy());
-                    TVector3 TVtemp = TLtemp.Vect();
-                    denominator += TVtemp.Mag();
-                    numerator += abs(x*TVtemp(0) + y*TVtemp(1) + z*TVtemp(2));
-                }
-                double Ttemp = numerator/denominator;
-                if(Ttemp > T){
-                    thetaMin = theta;   phiMin = phi; T = Ttemp;
-                    //                   cout<<"*************"<<endl;
-                    //                   cout<<"T : "<<T<<"thetaMin : phiMin "<<thetaMin<<" : "<<phiMin<<endl;
-                    //                   cout<<"*************"<<endl;
-                }
-            }
-        }
-        if(iter == 1){Told = T; Tnew = T;}
-        else if(T >= Tnew && iter != 1){
-            Told = Tnew; Tnew = T; cut = (Tnew - Told)/Tnew;
-        }
-        //        cout<<"cut : "<<cut<<endl;
-    }
-    while(cut >= 0.2);
-    
-    //    result[3] = {T, phiMin, thetaMin};
-    result.push_back(T);
-    
-    TVector3 tempThrust(0,0,0);
-    tempThrust.SetXYZ(sin(thetaMin)*cos(phiMin), sin(thetaMin)*sin(phiMin), cos(thetaMin));
-    
-    //the following code used to get Hemisphere masses
-    std::vector<TLorentzVector > hemisphere1;
-    std::vector<TLorentzVector > hemisphere2;
-    hemisphere1.clear(); hemisphere2.clear();
-    double visEn = 0;
-    double JetBroadeningDenominator = 0;
-    TVector3 TVtotal(0,0,0);
-    for(int i = 0; i<UsedForThrust.size(); i++){
-        TLorentzVector TLtemp = UsedForThrust.at(i);
-        //        TLorentzVector TLtemp(a_MCP->getMomentum(), a_MCP->getEnergy());
-        TVector3 TVtemp = TLtemp.Vect();
-        TVtotal += TVtemp;
-        if(TVtemp.Angle(tempThrust) > 0.5*TMath::Pi()){hemisphere1.push_back(TLtemp);}
-        else {hemisphere2.push_back(TLtemp);}
-        visEn += TLtemp.E();
-        JetBroadeningDenominator += TVtemp.Mag();
-    }
-    double hemi1En = 0, hemi1Mass = 0, hemi2En = 0, hemi2Mass = 0;
-    TLorentzVector TLsphere1(0,0,0,0);
-    TLorentzVector TLsphere2(0,0,0,0);
-    for(int i = 0; i<hemisphere1.size(); i++){
-        TLsphere1 += hemisphere1.at(i);
-    }
-    for(int i = 0; i<hemisphere2.size(); i++){
-        TLsphere2 += hemisphere2.at(i);
-    }
-    hemi1En = TLsphere1.E();   hemi1Mass = TLsphere1.M();
-    hemi2En = TLsphere2.E();   hemi2Mass = TLsphere2.M();
-    cout<<"hemi1En : "<<hemi1En<<" hemi2En : "<<hemi2En<<endl;
-    cout<<"hemi1Mass : "<<hemi1Mass<<" hemi2Mass : "<<hemi2Mass<<endl;
-    //    cout<<"the number of particles in two hemispheres is "<<hemisphere1.size()+hemisphere2.size()<<endl;
-    
-    
-    double JetBroadeningNumerator1 = 0, JetBroadeningNumerator2 =0;
-    TLorentzVector TLHemi1(0,0,0,0);
-    TLorentzVector TLHemi2(0,0,0,0);
-    for(int i = 0; i<hemisphere1.size(); i++){
-        TLorentzVector TLtemp = hemisphere1.at(i);
-        //        TLorentzVector TLtemp(a_MCP->getMomentum(), a_MCP->getEnergy());
-        TVector3 TVtemp = TLtemp.Vect();
-        TLHemi1 += TLtemp;
-        JetBroadeningNumerator1 += abs(TVtemp.Mag() * tempThrust.Mag() * sin(TVtemp.Angle(tempThrust)));
-        
-    }
-    for(int i = 0; i<hemisphere2.size(); i++){
-        TLorentzVector TLtemp = hemisphere2.at(i);
-        //        TLorentzVector TLtemp(a_MCP->getMomentum(), a_MCP->getEnergy());
-        TVector3 TVtemp = TLtemp.Vect();
-        TLHemi2 += TLtemp;
-        JetBroadeningNumerator2 += abs(TVtemp.Mag() * tempThrust.Mag() * sin(TVtemp.Angle(tempThrust)));
-    }
-    double hemiMass1 = 0, hemiMass2 = 0, hemiBroadening1 = 0, hemiBroadening2 = 0;
-    if(visEn != 0){
-        hemiMass1 = (TLHemi1.M())*(TLHemi1.M())/(visEn*visEn);
-        hemiMass2 = (TLHemi2.M())*(TLHemi2.M())/(visEn*visEn);
-    }
-    if(JetBroadeningDenominator != 0){
-        hemiBroadening1 = JetBroadeningNumerator1/(2*JetBroadeningDenominator);
-        hemiBroadening2 = JetBroadeningNumerator2/(2*JetBroadeningDenominator);
-    }
-    
-    //    cout<<"hemiMass1 : "<<hemiMass1<<" hemiMass2 : "<<hemiMass2<<endl;
-    //    cout<<"hemiBroadening1 : "<<hemiBroadening1<<" hemiBroadening2 : "<<hemiBroadening2<<endl;
-    result.push_back(hemiMass1);
-    result.push_back(hemiMass2);
-    result.push_back(hemiBroadening1);
-    result.push_back(hemiBroadening2);
-    
-    
-    
-    //the following code used to get rapidity
-    TVector3 TVParaThrust = tempThrust.Orthogonal();
-    double transverseM = TVtotal.Perp(TVParaThrust);
-    double rapidity = 0.5*log((visEn + transverseM)/(visEn - transverseM));
-    //    result.push_back(rapidity);
-    result.push_back( tempThrust.CosTheta() );
-    result.push_back( hemi1En ); result.push_back(hemi2En); result.push_back(hemi1Mass); result.push_back(hemi2Mass);
-    
-    cout<<"visEn : "<<visEn<<endl;
-    
-    //    return 0;
-}
-
-
 
 
