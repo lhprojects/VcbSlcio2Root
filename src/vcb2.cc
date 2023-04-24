@@ -77,18 +77,6 @@ _output(0)
     
 }
 
-// is B-bar hadron
-int ISBbar(int mc){
-    if(mc == 511 || mc == 521 || mc == 10511 || mc == 10521 || mc == 513 || mc == 523 || mc == 10513 || mc == 10523 || mc == 20513 || mc == 20523 || mc == 515 || mc == 525 || mc == 531 || mc == 10531 || mc == 533 || mc == 10533 || mc == 20533 || mc == 535 || mc == 541 || mc == 10541 || mc == 543 || mc == 10543 || mc == 20543 || mc == 545 || mc == -5122 || mc == -5112 || mc == -5212 || mc == -5222 || mc == -5114 || mc == -5214 || mc == -5224 || mc == -5132 || mc == -5232 || mc == -5312 || mc == -5322 || mc == -5314 || mc == -5324 || mc == -5332 || mc == -5334 || mc == -5142 || mc == -5242 || mc == -5412 || mc == -5422 || mc == -5414 || mc == -5424 || mc == -5342 || mc == -5432 || mc == -5434 || mc == -5442 || mc == -5444 || mc == -5512 || mc == -5522 || mc == -5514 || mc == -5524 || mc == -5532 || mc == -5534 || mc == -5542 || mc == -5544 || mc == -5544 ) {return 1;}
-    else {return 0;}
-}
-
-// Is B hadron
-int ISB(int mc){
-    if(mc == -511 || mc == -521 || mc == -10511 || mc == -10521 || mc == -513 || mc == -523 || mc == -10513 || mc == -10523 || mc == -20513 || mc == -20523 || mc == -515 || mc == -525 || mc == -531 || mc == -10531 || mc == -533 || mc == -10533 || mc == -20533 || mc == -535 || mc == -541 || mc == -10541 || mc == -543 || mc == -10543 || mc == -20543 || mc == -545 || mc == 5122 || mc == 5112 || mc == 5212 || mc == 5222 || mc == 5114 || mc == 5214 || mc == 5224 || mc == 5132 || mc == 5232 || mc == 5312 || mc == 5322 || mc == 5314 || mc == 5324 || mc == 5332 || mc == 5334 || mc == 5142 || mc == 5242 || mc == 5412 || mc == 5422 || mc == 5414 || mc == 5424 || mc == 5342 || mc == 5432 || mc == 5434 || mc == 5442 || mc == 5444 || mc == 5512 || mc == 5522 || mc == 5514 || mc == 5524 || mc == 5532 || mc == 5534 || mc == 5542 || mc == 5544 || mc == 5544 ) {return 1;}
-    else {return 0;}
-    
-}
 
 void findCombine(int index, vector<int> &a, vector<int>& tmp, const int& n, vector<vector<int> >& res){
 	if(tmp.size() == n/2){
@@ -124,13 +112,7 @@ vector<int> DifferenceSet(vector<int> total, vector<int> original, vector<int> l
 }
 std::vector<vector<int> > pair4jets(int numjets);
 
-// from large to small
 static bool sortEn(ReconstructedParticle* a1, ReconstructedParticle* a2){
-    return a1->getEnergy() >= a2->getEnergy();
-}
-
-// from large to small
-static bool sortEnMC(MCParticle* a1, MCParticle* a2){
     return a1->getEnergy() >= a2->getEnergy();
 }
 
@@ -148,72 +130,78 @@ void vcb2::init() {
     
     _outputTree->Branch("EventNr",       &eventNr,        "EventNr/I");
     _outputTree->Branch("Num",           &Num,            "Num/I");
+    _outputTree->Branch("visEn",         &visEn,          "visEn/D");
+    _outputTree->Branch("multiplicity",  &multiplicity,   "multiplicity/I");
+    _outputTree->Branch("LeadElecEn",    &LeadElecEn,     "LeadElecEn/D");
+    _outputTree->Branch("leadMuonEn",    &leadMuonEn,     "leadMuonEn/D");
+    
+    _outputTree->Branch("leadPionEn",    &leadPionEn,     "leadPionEn/D");
+    _outputTree->Branch("leadGammaEn",    &leadGammaEn,     "leadGammaEn/D");
 
 
-    _outputTree->Branch("HbbL",          &HbbL,                "HbbL[2]/F");
-    _outputTree->Branch("HccL",          &HccL,                "HccL[2]/F");
-    
-    _outputTree->Branch("jet14m",        &jet14m,              "jet14m[4]/F");
-    _outputTree->Branch("jet24m",        &jet24m,              "jet24m[4]/F");
+    _outputTree->Branch("subleadMuonEn", &subleadMuonEn,  "subleadMuonEn/D");
+    _outputTree->Branch("EnA",           &EnA,            "EnA/D");
 
-    _outputTree->Branch("quark14m",      &quark14m,            "quark14m[4]/F");
-    _outputTree->Branch("quark24m",      &quark24m,            "quark24m[4]/F");
+    _outputTree->Branch("leadMuonIMP",   &leadMuonIMP,    "leadMuonIMP/D");
+    _outputTree->Branch("subleadMuonIMP",&subleadMuonIMP, "subleadMuonIMP/D");
     
-    _outputTree->Branch("quark1PDG",     &quark1PDG,           "quark1PDG/I");
-    _outputTree->Branch("quark2PDG",     &quark2PDG,           "quark2PDG/I");
+    _outputTree->Branch("ratio15",       &ratio15,        "ratio15/D");
+    _outputTree->Branch("ratio30",       &ratio30,        "ratio30/D");
+    _outputTree->Branch("subratio15",    &subratio15,     "subratio15/D");
+    _outputTree->Branch("subratio30",    &subratio30,     "subratio30/D");
+
+    _outputTree->Branch("num_jet",       &num_jet,        "num_jet/I");
+    _outputTree->Branch("JetsInvMass",   &JetsInvMass,    "JetsInvMass/D");
+    _outputTree->Branch("JetsRecoilMass",&JetsRecoilMass, "JetsRecoilMass/D");
+    _outputTree->Branch("jet1cosTheta",  &jet1cosTheta,   "jet1cosTheta/D");
+    _outputTree->Branch("jet2cosTheta",  &jet2cosTheta,   "jet2cosTheta/D");
+    _outputTree->Branch("jet1En",        &jet1En,         "jet1En/D");
+    _outputTree->Branch("jet2En",        &jet2En,         "jet2En/D");
+    _outputTree->Branch("jet1quark",     &jet1quark,      "jet1quark/I");
+    _outputTree->Branch("jet2quark",     &jet2quark,      "jet2quark/I");
+
+    _outputTree->Branch("leadMuonCharge",     &leadMuonCharge,      "leadMuonCharge/I");
+    _outputTree->Branch("subleadMuonCharge",  &subleadMuonCharge,   "subleadMuonCharge/I");
+    _outputTree->Branch("chargeA",            &chargeA,             "chargeA/I");
+
+
+    _outputTree->Branch("num_quark",        &num_quark,        "num_quark/I");
+    _outputTree->Branch("angle1",           &angle1,           "angle1/D");
+    _outputTree->Branch("angle2",           &angle2,           "angle2/D");
     
-//    _outputTree->Branch("jet1LeadHadEnRatio",     &jet1LeadHadEnRatio,           "jet1LeadHadEnRatio/F");
-//    _outputTree->Branch("jet2LeadHadEnRatio",     &jet2LeadHadEnRatio,           "jet2LeadHadEnRatio/F");
-    
-    _outputTree->Branch("lead1HadEn",     &lead1HadEn,           "lead1HadEn/F");
-    _outputTree->Branch("lead2HadEn",     &lead2HadEn,           "lead2HadEn/F");
-    _outputTree->Branch("lead1PID",     &lead1PID,           "lead1PID/I");
-    _outputTree->Branch("lead2PID",     &lead2PID,           "lead2PID/I");
-    _outputTree->Branch("lead1EndP",        &lead1EndP,              "lead1EndP[3]/F");
-    _outputTree->Branch("lead2EndP",        &lead2EndP,              "lead2EndP[3]/F");
-    _outputTree->Branch("num_92BDaus",     &num_92BDaus,           "num_92BDaus/I");
+    _outputTree->Branch("missPt",           &missPt,           "missPt/D");
+    _outputTree->Branch("missM",            &missM,            "missM/D");
+    _outputTree->Branch("angleLA",          &angleLA,          "angleLA/D");
+    _outputTree->Branch("leadMcosTheta",    &leadMcosTheta,    "leadMcosTheta/D");
 
     
-    _outputTree->Branch("thrust",        &thrust,              "thrust/D");
+    
+    _outputTree->Branch("tauDecay",          &tauDecay,            "tauDecay/I");
+
+    _outputTree->Branch("HbbL",              &HbbL,                "HbbL[2]/F");
+    _outputTree->Branch("HccL",              &HccL,                "HccL[2]/F");
+    
+    _outputTree->Branch("jet14m",              &jet14m,                "jet14m[4]/F");
+    _outputTree->Branch("jet24m",              &jet24m,                "jet24m[4]/F");
+    
+    _outputTree->Branch("quark14m",              &quark14m,                "quark14m[4]/F");
+    _outputTree->Branch("quark24m",              &quark24m,                "quark24m[4]/F");
+    
     _outputTree->Branch("Y12",           &Y12,                 "Y12/D");
     _outputTree->Branch("Y23",           &Y23,                 "Y23/D");
     _outputTree->Branch("Y34",           &Y34,                 "Y34/D");
+    
+    _outputTree->Branch("quark1PDG",         &quark1PDG,           "quark1PDG/I");
+    _outputTree->Branch("quark2PDG",         &quark2PDG,           "quark2PDG/I");
+    _outputTree->Branch("quark3PDG",         &quark3PDG,           "quark3PDG/I");
+    _outputTree->Branch("quark4PDG",         &quark4PDG,           "quark4PDG/I");
+
  
     Num = 0;
 }
 
-
-bool isQuark(int pdg) {
-    return abs(PDG) == 1 || abs(PDG) == 2 || abs(PDG) == 3 || abs(PDG) == 4 || abs(PDG) == 5 || abs(PDG) == 6;
-}
-
-void getYs(LCEvent * evtP, int &Y12, int &Y23, int &Y34)
-{
-    Y12 = 999, Y23 = 999, Y34 = 999;
-
-    LCCollection* col_Jet = evtP->getCollection( "RefinedJets" );
-    int num_jet = col_Jet->getNumberOfElements();
-    cout<<"num_jet : "<<num_jet<<endl;
-    
-    if(num_jet == 2) {
-        PIDHandler pidh(col_Jet);
-        int algo   = 0;
-        algo = pidh.getAlgorithmID("yth");
-        int iy12 = -1, iy23 = -1, iy34 = -1;
-        iy12 = pidh.getParameterIndex (algo, "y12" );
-        iy23 = pidh.getParameterIndex (algo, "y23" );
-        iy34 = pidh.getParameterIndex (algo, "y34" );
-        ReconstructedParticle* jet = dynamic_cast<ReconstructedParticle*>(col_Jet->getElementAt(0));
-        const ParticleID &pid = pidh.getParticleID(jet, algo);
-        Y12 = pid.getParameters()[iy12];
-        Y23 = pid.getParameters()[iy23];
-        Y34 = pid.getParameters()[iy34];
-    }    
-}
-
 void vcb2::processEvent( LCEvent * evtP )
 {
-    
     
     if (evtP)
     {
@@ -223,164 +211,322 @@ void vcb2::processEvent( LCEvent * evtP )
             eventNr = evtP->getEventNumber();
             cout<<"eventNr : "<<eventNr<<" Num : "<<Num<<endl;
             
-            
             //ArborPFOs
-            LCCollection* col_PFO = evtP->getCollection( "ArborPFOs" );
+            LCCollection* col_PFO = evtP->getCollection( "LICHPFOs" );
             int nPFO = col_PFO->getNumberOfElements();
             cout<<"nPFO : "<<nPFO<<endl;
-            std::vector<TLorentzVector>         vArborTL;   vArborTL.clear();
+            TLorentzVector TLPFO(0,0,0,0);
+            
+            
+            std::vector<ReconstructedParticle*> vElec;      vElec.clear();
+            std::vector<ReconstructedParticle*> vMuon;      vMuon.clear();
+            std::vector<ReconstructedParticle*> vPion;      vPion.clear();
+            std::vector<ReconstructedParticle*> vKaon;      vKaon.clear();
+            std::vector<ReconstructedParticle*> vProton;      vProton.clear();
+            std::vector<ReconstructedParticle*> vGamma;      vGamma.clear();
+
+
 
             for(int i = 0; i<nPFO; i++){
                 ReconstructedParticle* pfo = dynamic_cast<ReconstructedParticle*>(col_PFO->getElementAt(i));
                 TLorentzVector temp(pfo->getMomentum(), pfo->getEnergy());
-                vArborTL.push_back(temp);
+                TLPFO += temp;
+                int type = abs(pfo->getType());
+                if(type == 11){vElec.push_back(pfo);}
+                if(type == 13){vMuon.push_back(pfo);}
+                if(type == 211){vPion.push_back(pfo);}
+                if(type == 321){vKaon.push_back(pfo);}
+                if(type == 2212){vProton.push_back(pfo);}
+                if(type == 22){vGamma.push_back(pfo);}
+
             }
-
-            // quark list ...
-            std::vector<MCParticle*> quarkvec;
-            LCCollection* col_MCP = evtP->getCollection( "MCParticle" );
-            int const n_MCP = col_MCP->getNumberOfElements();
             
-            std::vector<MCParticle*> v92Daus;
+            cout<<"the total energy of ArborPFOs is : "<<TLPFO.E()<<endl;
 
-//            std::map<MCParticle*, float> mapMCcount; mapMCcount.clear();
+            missPt = 999; missM = 999;
+            TLorentzVector TLCM(0,0,0,240);
+            missPt = ((TLCM - TLPFO).Vect()).Perp();
+            missM = (TLCM - TLPFO).M();
+            cout<<"missPt : "<<missPt<<endl;
             
-            for(int i = 0; i < n_MCP; i++)
-            {
-                MCParticle* a_MCP = dynamic_cast<MCParticle*>(col_MCP->getElementAt(i));
-                int const NParents      = a_MCP->getParents().size();
-                int const NDaughters    = a_MCP->getDaughters().size();
-                int const PDG           = a_MCP->getPDG();
+            
+           
                 
+            //the following code used to analysis the multiplicity information of final state particles
+            visEn = 0; multiplicity = 0;
+            visEn = TLPFO.E();
+            multiplicity = nPFO;
+            
+            leadMuonEn = 0, LeadElecEn = 0, subleadMuonEn = 0, ratio15 = 0, ratio30 = 0, subratio15 = 0, subratio30 = 0;
+            leadMuonCharge = 0, subleadMuonCharge = 0;
+            leadMuonIMP = 0,    subleadMuonIMP = 0;
+            leadMcosTheta = 0;
 
+            
+            sort(vElec.begin(), vElec.end(), sortEn);
+            sort(vMuon.begin(), vMuon.end(), sortEn);
+            sort(vPion.begin(), vPion.end(), sortEn);
+            
+            sort(vGamma.begin(), vGamma.end(), sortEn);
+
+            
+
+            ReconstructedParticle* leadMuon = NULL;
+            ReconstructedParticle* leadMuonAround = NULL;
+            ReconstructedParticle* subleadMuon = NULL;
+            
+            std::vector<ReconstructedParticle*> muonAround; muonAround.clear();
+            
+            
+
+            ReconstructedParticle* leadElec = NULL;
+            if(vMuon.size() > 0){
+                leadMuon = vMuon.at(0);
+                leadMuonEn = leadMuon->getEnergy();
+                leadMuonCharge = leadMuon->getCharge();
+                Track* leadMuonTrack = leadMuon->getTracks()[0];
+                double pD0 = leadMuonTrack->getD0();
+                double pZ0 = leadMuonTrack->getZ0();
+                double psquare = pow( pD0*pD0 + pZ0*pZ0, 0.5 );
+                leadMuonIMP = psquare;
                 
-                if(NParents == 0 && isQuark(PDG) ) {
-                    quarkvec.push_back(a_MCP);
+                TLorentzVector TLseedMuon(leadMuon->getMomentum(), leadMuon->getEnergy());
+                TVector3 TVseedMuon = TLseedMuon.Vect();
+                leadMcosTheta = TVseedMuon.CosTheta();
+                
+                TLorentzVector TLaround15(0, 0, 0, 0);
+                TLorentzVector TLaround30(0, 0, 0, 0);
+                TLorentzVector subTLaround15(0, 0, 0, 0);
+                TLorentzVector subTLaround30(0, 0, 0, 0);
+
+                for(int i = 0; i<nPFO; i++){
+                    ReconstructedParticle* pfo = dynamic_cast<ReconstructedParticle*>(col_PFO->getElementAt(i));
+                    TLorentzVector temp(pfo->getMomentum(), pfo->getEnergy());
+                    TVector3 TVtemp = temp.Vect();
+                    
+                    if(pfo != leadMuon){
+                        if( TVtemp.Angle(TVseedMuon) < 15./180 * 3.1415 ){ TLaround15 += temp; }
+                        if( TVtemp.Angle(TVseedMuon) < 30./180 * 3.1415 ){ TLaround30 += temp;
+                            if(abs(pfo->getType()) == 13){muonAround.push_back(pfo);}
+                        }
+                    }
+                    
                 }
                 
-                if(PDG == 92) {
-                    for(int j = 0; j < NDaughters; j++){
-                        MCParticle* mcp_92Dau = a_MCP->getDaughters()[j];
-                        int tempPDG = mcp_92Dau->getPDG();
-                        if(ISB(tempPDG) == 1 || ISBbar(tempPDG) == 1) {                            
-                            if(v92Daus.size() == 0) { v92Daus.push_back(mcp_92Dau); }
-                            else{
-                                int count = 0;
-                                for(int k = 0; k<v92Daus.size(); k++){
-                                    MCParticle* temp = v92Daus.at(k);
-                                    if( abs(temp->getEnergy() - mcp_92Dau->getEnergy())<0.01 ){ count = 1; }
-                                }
-                                if( count == 0 ){ v92Daus.push_back(mcp_92Dau); }
-                            }
-                            
-                            
+                ratio15 = leadMuon->getEnergy()/( TLaround15.E() + leadMuon->getEnergy() );
+                ratio30 = leadMuon->getEnergy()/( TLaround30.E() + leadMuon->getEnergy() );
+                
+                
+                if(vMuon.size() > 1){
+                    subleadMuon = vMuon.at(1);
+                    subleadMuonEn = subleadMuon->getEnergy();
+                    subleadMuonCharge = subleadMuon->getCharge();
+                    
+                    Track* subleadMuonTrack = subleadMuon->getTracks()[0];
+                    double nD0 = subleadMuonTrack->getD0();
+                    double nZ0 = subleadMuonTrack->getZ0();
+                    double nsquare = pow( nD0*nD0 + nZ0*nZ0, 0.5 );
+                    subleadMuonIMP = nsquare;
+                    
+                    for(int i = 0; i<nPFO; i++){
+                        ReconstructedParticle* pfo = dynamic_cast<ReconstructedParticle*>(col_PFO->getElementAt(i));
+                        TLorentzVector temp(pfo->getMomentum(), pfo->getEnergy());
+                        TVector3 TVtemp = temp.Vect();
+                        if(pfo != subleadMuon){
+                            if( TVtemp.Angle(TVseedMuon) < 15./180 * 3.1415 ){ subTLaround15 += temp; }
+                            if( TVtemp.Angle(TVseedMuon) < 30./180 * 3.1415 ){ subTLaround30 += temp; }
+                        }
+                    }
+                    subratio15 = subleadMuon->getEnergy()/( subTLaround15.E() + subleadMuon->getEnergy() );
+                    subratio30 = subleadMuon->getEnergy()/( subTLaround30.E() + subleadMuon->getEnergy() );
+                }
+            }
+            
+            
+//            cout<<"vMuon.size() : "<<vMuon.size()<<" subleadMuonEn : "<<subleadMuonEn<<" subratio15 : "<<subratio15<<" subratio30 : "<<subratio30<<endl;
+//            cout<<"leadMuonCharge : "<<leadMuonCharge<<" subleadMuonCharge : "<<subleadMuonCharge<<endl;
+//            cout<<"leadMuonIMP : "<<leadMuonIMP<<" "<<subleadMuonIMP<<endl;
+//            cout<<"missPt : "<<missPt<<" leadMcosTheta : "<<leadMcosTheta<<endl;
+            
+            if(vElec.size() > 0){
+                leadElec = vElec.at(0);
+                LeadElecEn = leadElec->getEnergy();
+            }
+            
+            cout<<"vPion.size() : "<<vPion.size()<<endl;
+            cout<<"vKaon.size() : "<<vKaon.size()<<endl;
+            cout<<"vProton.size() : "<<vProton.size()<<endl;
+            cout<<"vGamma.size() : "<<vGamma.size()<<endl;
+
+
+            leadPionEn = 0;
+            if(vPion.size() > 0){
+                ReconstructedParticle* leadPion = vPion.at(0);
+                leadPionEn = leadPion->getEnergy();
+            }
+            
+            leadGammaEn = 0;
+            if(vGamma.size() > 0){
+                ReconstructedParticle* leadPion = vGamma.at(0);
+                leadGammaEn = leadPion->getEnergy();
+            }
+            
+
+            chargeA = 999; EnA = 999; angleLA = 999;
+            if(muonAround.size() != 0){
+                sort(muonAround.begin(), muonAround.end(), sortEn);
+                leadMuonAround = muonAround.at(0);
+                TLorentzVector TLLeadM(leadMuon->getMomentum(), leadMuon->getEnergy());
+                TLorentzVector TLLA(leadMuonAround->getMomentum(), leadMuonAround->getEnergy());
+                TVector3 TV3leadM = TLLeadM.Vect();
+                TVector3 TV3LA = TLLA.Vect();
+                angleLA = TV3leadM.Angle(TV3LA);
+                EnA = leadMuonAround->getEnergy();
+                chargeA = leadMuonAround->getCharge();
+                cout<<"chargeA : "<<chargeA<<" EnA : "<<EnA<<" angleLA : "<<angleLA<<endl;
+            }
+            
+            TLorentzVector TLT240(0, 0, 0, 240);
+            
+            tauDecay = 999;
+            std::vector<MCParticle*> quarkvec; quarkvec.clear();
+            LCCollection* col_MCP = evtP->getCollection( "MCParticle" );
+            int n_MCP = col_MCP->getNumberOfElements();
+            MCParticle* tauCandidate = NULL;
+            
+            for(int i = 0; i<n_MCP; i++)
+            {
+                MCParticle* a_MCP = dynamic_cast<MCParticle*>(col_MCP->getElementAt(i));
+                int NParents      = a_MCP->getParents().size();
+                int NDaughters    = a_MCP->getDaughters().size();
+                int PDG           = a_MCP->getPDG();
+                TLorentzVector temp(a_MCP->getMomentum(), a_MCP->getEnergy());
+                TVector3 tempV3 = temp.Vect();
+                
+                if( abs(PDG) == 15){
+                    
+                    cout<<"find tau -------------------------------------------"<<endl;
+                    
+                    for(int j = 0; j<a_MCP->getDaughters().size(); j++){
+                        MCParticle* tauDau = a_MCP->getDaughters()[j];
+                        if(abs(tauDau->getPDG()) == 16){
+                            tauCandidate = a_MCP;
+                            break;
                         }
                     }
                 }
                 
+                if(NParents == 0 && (abs(PDG) == 1 || abs(PDG) == 2 || abs(PDG) == 3 || abs(PDG) == 4 || abs(PDG) == 5 || abs(PDG) == 6) ){
+                    quarkvec.push_back(a_MCP);
+                    
+                }
                 
-                
-            }
+                if( PDG == 25 && NDaughters == 4 ){
+                    cout<<"quarkvec.size() : "<<quarkvec.size()<<endl;
+                    
+                    MCParticle* HDau = a_MCP->getDaughters()[0];
+                    int HDauPDG = HDau->getPDG();
+                    if( abs(HDauPDG) == 1 || abs(HDauPDG) == 2 || abs(HDauPDG) == 3 || abs(HDauPDG) == 4 || abs(HDauPDG) == 5 || abs(HDauPDG) == 6 || abs(HDauPDG) == 21 ){
                         
-            for(int i = 0; i<4; i++){
-                jet14m[i] = 999;
-                jet24m[i] = 999;
-                
-                quark14m[i] = 999;
-                quark24m[i] = 999;
-            }
-            
-            
-            sort(v92Daus.begin(), v92Daus.end(), sortEnMC);
-            
-            if(v92Daus.size() != 0){
-                for(int i = 0; i<v92Daus.size(); i++){
-                    MCParticle* a_MCP = v92Daus.at(i);
-                    cout<<"a_MCP->getPDG() : "<<a_MCP->getPDG()<<endl;
-                }
-            
-            }
-            
-            
-            MCParticle* lead1 = NULL; MCParticle* lead2 = NULL;
-            MCParticle* lead1LeadHad = NULL; MCParticle* lead2LeadHad = NULL;
-            num_92BDaus = 0; num_92BDaus = v92Daus.size();
-            cout<<"num_92BDaus : "<<num_92BDaus<<endl;
-            
-            if(v92Daus.size() > 1){
-                lead1 = v92Daus.at(0);
-                lead2 = v92Daus.at(1);
-                int stop = 1, immediately = 0;
-                
-                while( lead1->getDaughters().size() != 0 && stop != 0){
-                    stop = 0;
-//                    immediately += 1;
-                    for(int i = 0; i<lead1->getDaughters().size(); i++){
-                        MCParticle* Dau = lead1->getDaughters()[i];
-                        int DauPDG = Dau->getPDG();
-                        if(ISB(DauPDG) == 1 || ISBbar(DauPDG) == 1){ lead1 = Dau; stop += 1;}
+                        cout<<"HDauPDG : "<<HDauPDG<<endl;
+                        
+                        quarkvec.push_back( HDau );
+                        MCParticle* HDau2 = a_MCP->getDaughters()[1];
+                        quarkvec.push_back( HDau2 );
+                        cout<<"quarkvec.size() : "<<quarkvec.size()<<endl;
                     }
                 }
-//                if(stop == 0 ){ lead1LeadHad = lead1; }
-                
-                
-                stop = 1; immediately = 0;
-                while( lead2->getDaughters().size() != 0 && stop != 0){
-                    stop = 0;
-//                    immediately += 1;
-                    for(int i = 0; i<lead2->getDaughters().size(); i++){
-                        MCParticle* Dau = lead2->getDaughters()[i];
-                        int DauPDG = Dau->getPDG();
-                        if(ISB(DauPDG) == 1 || ISBbar(DauPDG) == 1){ lead2 = Dau; stop += 1;}
-                    }
+            }
+            
+            if(tauCandidate != NULL){
+                for(int i = 0; i<tauCandidate->getDaughters().size(); i++){
+                    MCParticle* tauD = tauCandidate->getDaughters()[i];
+                    if( abs(tauD->getPDG()) == 11 || abs(tauD->getPDG()) == 13 ){ tauDecay = tauD->getPDG(); }
                 }
-                
-
-                cout<<"lead1LeadHad->getPDG() : "<<lead1->getPDG()<<" : "<<lead2->getPDG()<<endl;
-                            
-            }
-                
-            
-            
-            quark1PDG = 999, quark2PDG = 999;
-            if(quarkvec.size() == 2){
-                MCParticle* quark1 = quarkvec.at(0);
-                MCParticle* quark2 = quarkvec.at(1);
-                quark1PDG = quark1->getPDG();
-                quark2PDG = quark2->getPDG();
-
-                quark14m[0] = quark1->getMomentum()[0];
-                quark14m[1] = quark1->getMomentum()[1];
-                quark14m[2] = quark1->getMomentum()[2];
-                quark14m[3] = quark1->getEnergy();
-                
-                quark24m[0] = quark2->getMomentum()[0];
-                quark24m[1] = quark2->getMomentum()[1];
-                quark24m[2] = quark2->getMomentum()[2];
-                quark24m[3] = quark2->getEnergy();
-                
+                if( tauDecay == 999  ){ tauDecay = 1; }
             }
             
-            
-            getYs(evtP, Y12, Y23, Y34);
+            cout<<"tauDecay : "<<tauDecay<<endl;
             
             for(int i = 0; i<2; i++){
                 HbbL[i] = 999;
                 HccL[i] = 999;
             }
             
-
-            
-//            jet1LeadHadEnRatio = 0, jet2LeadHadEnRatio = 0;
-            lead1HadEn = 0, lead2HadEn = 0;
-            
-            for(int i = 0; i < 3; i++){
-                lead1EndP[i] = 999;
-                lead2EndP[i] = 999;
+            for(int i = 0; i<4; i++){
+                jet14m[i] = 999;
+                jet24m[i] = 999;
+                quark14m[i] = 999;
+                quark24m[i] = 999;
             }
 
-            lead1PID = 999, lead2PID = 999;
-  
+            LCCollection* col_Jet = evtP->getCollection( "RefinedJets" );
+            num_jet = col_Jet->getNumberOfElements();
+            cout<<"num_jet : "<<num_jet<<endl;
+            JetsInvMass = 0;
+            jet1cosTheta = 999, jet2cosTheta = 999, jet1En = 999, jet2En = 999;
+            TLorentzVector TLJets(0,0,0,0);
+            
+            Y12 = 999, Y23 = 999, Y34 = 999;
+
+            
+            if(num_jet >= 1){
+
+                PIDHandler pidh(col_Jet);
+                int algo   = 0;
+                int ibtag  =-1;
+                int ictag  =-1;
+                int ibctag =-1;
+                int icat   =-1;
+                
+                
+                
+                algo = pidh.getAlgorithmID("yth");
+                int iy12 = -1, iy23 = -1, iy34 = -1;
+                iy12 = pidh.getParameterIndex (algo, "y12" );
+                iy23 = pidh.getParameterIndex (algo, "y23" );
+                iy34 = pidh.getParameterIndex (algo, "y34" );
+                ReconstructedParticle* jet = dynamic_cast<ReconstructedParticle*>(col_Jet->getElementAt(0));
+                const ParticleID &pid = pidh.getParticleID(jet, algo);
+                Y12 = pid.getParameters()[iy12];
+                Y23 = pid.getParameters()[iy23];
+                Y34 = pid.getParameters()[iy34];
+
+                
+                
+                algo      = pidh.getAlgorithmID("lcfiplus");
+                ibtag     = pidh.getParameterIndex (algo,  "BTag");
+                ictag     = pidh.getParameterIndex (algo,  "CTag");
+                ibctag    = pidh.getParameterIndex (algo,  "BCTag");
+                icat      = pidh.getParameterIndex (algo,  "Category");
+                
+                
+                for(int i = 0; i<num_jet; i++){
+                    ReconstructedParticle* jet = dynamic_cast<ReconstructedParticle*>(col_Jet->getElementAt(i));
+                    TLorentzVector TLtemp(jet->getMomentum(), jet->getEnergy());
+                    TLJets += TLtemp;
+                    const ParticleID &pid = pidh.getParticleID(jet, algo);
+                    double btag  = pid.getParameters()[ibtag];
+                    double ctag  = pid.getParameters()[ictag];
+                    double bctag = pid.getParameters()[ibctag];
+                    double cat   = pid.getParameters()[icat];
+                    double otag = 1 - btag - ctag;
+                    
+                }
+            }
+            
+            
+            JetsInvMass = TLJets.M();
+            JetsRecoilMass = 0;
+            JetsRecoilMass = (TLT240 - TLJets).M();
+            
+            jet1quark = 0, jet2quark = 0;
+            num_quark = 0;
+            num_quark = quarkvec.size();
+            angle1 = 999, angle2 = 999;
+            
+            quark2PDG = 0, quark3PDG = 0, quark4PDG = 0, quark1PDG = 0;
+            
             if(num_jet == 2){
                 
                 PIDHandler pidh(col_Jet);
@@ -396,84 +542,52 @@ void vcb2::processEvent( LCEvent * evtP )
                 icat      = pidh.getParameterIndex (algo,  "Category");
                 
                 ReconstructedParticle* jet1 = dynamic_cast<ReconstructedParticle*>(col_Jet->getElementAt(0));
-                TLorentzVector TLjet1(jet1->getMomentum(), jet1->getEnergy());
-                TVector3 TVjet1 = TLjet1.Vect();
                 
                 const ParticleID &pid1 = pidh.getParticleID(jet1, algo);
                 double btag1  = pid1.getParameters()[ibtag];
                 double ctag1  = pid1.getParameters()[ictag];
 
+                
+                TLorentzVector TLjet1(jet1->getMomentum(), jet1->getEnergy());
+                TVector3 TVjet1 = TLjet1.Vect();
+                jet1cosTheta = TVjet1.CosTheta();
+                jet1En = jet1->getEnergy();
+                jet14m[0] = jet1->getMomentum()[0]; jet14m[1] = jet1->getMomentum()[1];
+                jet14m[2] = jet1->getMomentum()[2]; jet14m[3] = jet1->getEnergy();
+
                 ReconstructedParticle* jet2 = dynamic_cast<ReconstructedParticle*>(col_Jet->getElementAt(1));
-                TLorentzVector TLjet2(jet2->getMomentum(), jet2->getEnergy());
-                TVector3 TVjet2 = TLjet2.Vect();
-                
-                
-                if( v92Daus.size() > 1 ){
-//                    lead1 = lead1LeadHad;
-//                    lead2 = lead2LeadHad;
-                    
-                    TLorentzVector TLlead1(lead1->getMomentum(), lead1->getEnergy());
-                    TVector3 TVlead1 = TLlead1.Vect();
-                    TLorentzVector TLlead2(lead2->getMomentum(), lead2->getEnergy());
-                    TVector3 TVlead2 = TLlead2.Vect();
-                    
-                    if(TVlead1.Angle(TVjet1) + TVlead2.Angle(TVjet2) < TVlead1.Angle(TVjet2) + TVlead2.Angle(TVjet1) ){
-                        lead1HadEn = lead1->getEnergy(); lead1PID = lead1->getPDG();
-                        TVector3 lead1EP = lead1->getEndpoint();
-                        lead1EndP[0] = lead1EP[0]; lead1EndP[1] = lead1EP[1]; lead1EndP[2] = lead1EP[2];
-                        
-                        lead2HadEn = lead2->getEnergy(); lead2PID = lead2->getPDG();
-                        TVector3 lead2EP = lead2->getEndpoint();
-                        lead2EndP[0] = lead2EP[0]; lead2EndP[1] = lead2EP[1]; lead2EndP[2] = lead2EP[2];
-
-                    }
-                    else{
-                        TVector3 lead1EP = lead1->getEndpoint();
-                        TVector3 lead2EP = lead2->getEndpoint();
-
-                        lead1HadEn = lead2->getEnergy(); lead1PID = lead2->getPDG();
-                        lead1EndP[0] = lead2EP[0]; lead1EndP[1] = lead2EP[1]; lead1EndP[2] = lead2EP[2];
-
-                        lead2HadEn = lead1->getEnergy(); lead2PID = lead1->getPDG();
-                        lead2EndP[0] = lead1EP[0]; lead2EndP[1] = lead1EP[1]; lead2EndP[2] = lead1EP[2];
-
-                    }
-                
-                }
-                
                 
                 const ParticleID &pid2 = pidh.getParticleID(jet2, algo);
                 double btag2  = pid2.getParameters()[ibtag];
                 double ctag2  = pid2.getParameters()[ictag];
 
+                TLorentzVector TLjet2(jet2->getMomentum(), jet2->getEnergy());
+                TVector3 TVjet2 = TLjet2.Vect();
+                jet2cosTheta = TVjet2.CosTheta();
+                jet2En = jet2->getEnergy();
+                
+                jet24m[0] = jet1->getMomentum()[0]; jet24m[1] = jet1->getMomentum()[1];
+                jet24m[2] = jet1->getMomentum()[2]; jet24m[3] = jet1->getEnergy();
+                
+                cout<<"btag1 : "<<btag1<<" btag2 "<<btag2<<endl;
+                cout<<"jet1cosTheta : "<<jet1cosTheta<<" "<<jet1En<<" "<<jet2cosTheta<<" "<<jet2En<<endl;
+                
                 HbbL[0] = btag1; HbbL[1] = btag2;
                 HccL[0] = ctag1; HccL[1] = ctag2;
                 
-                jet14m[0] = jet1->getMomentum()[0];
-                jet14m[1] = jet1->getMomentum()[1];
-                jet14m[2] = jet1->getMomentum()[2];
-                jet14m[3] = jet1->getEnergy();
-                
-                jet24m[0] = jet2->getMomentum()[0];
-                jet24m[1] = jet2->getMomentum()[1];
-                jet24m[2] = jet2->getMomentum()[2];
-                jet24m[3] = jet2->getEnergy();
-                
-                
-                
-                if(quarkvec.size() == 2){
+                if(quarkvec.size() > 1){
                     MCParticle* quark1 = quarkvec.at(0);
                     MCParticle* quark2 = quarkvec.at(1);
-                    
                     TLorentzVector TLquark1(quark1->getMomentum(), quark1->getEnergy());
                     TLorentzVector TLquark2(quark2->getMomentum(), quark2->getEnergy());
                     TVector3 TVquark1 = TLquark1.Vect();
                     TVector3 TVquark2 = TLquark2.Vect();
-                    
+                
                     if(TVjet1.Angle(TVquark1) + TVjet2.Angle(TVquark2) < TVjet1.Angle(TVquark2) + TVjet2.Angle(TVquark1)){
-                        
-                        quark1PDG = quark1->getPDG();
-                        quark2PDG = quark2->getPDG();
+                        jet1quark = quark1->getPDG();
+                        jet2quark = quark2->getPDG();
+                        angle1 = TVjet1.Angle(TVquark1);
+                        angle2 = TVjet2.Angle(TVquark2);
                         
                         quark14m[0] = quark1->getMomentum()[0]; quark14m[1] = quark1->getMomentum()[1];
                         quark14m[2] = quark1->getMomentum()[2]; quark14m[3] = quark1->getEnergy();
@@ -481,36 +595,28 @@ void vcb2::processEvent( LCEvent * evtP )
                         quark24m[2] = quark2->getMomentum()[2]; quark24m[3] = quark2->getEnergy();
                     }
                     else{
-                        
-                        quark1PDG = quark2->getPDG();
-                        quark2PDG = quark1->getPDG();
+                        jet1quark = quark2->getPDG();
+                        jet2quark = quark1->getPDG();
+                        angle1 = TVjet1.Angle(TVquark2);
+                        angle2 = TVjet2.Angle(TVquark1);
                         
                         quark14m[0] = quark2->getMomentum()[0]; quark14m[1] = quark2->getMomentum()[1];
                         quark14m[2] = quark2->getMomentum()[2]; quark14m[3] = quark2->getEnergy();
                         quark24m[0] = quark1->getMomentum()[0]; quark24m[1] = quark1->getMomentum()[1];
                         quark24m[2] = quark1->getMomentum()[2]; quark24m[3] = quark1->getEnergy();
                     }
-                    
-                }
                 
+                    quark1PDG = quark1->getPDG();
+                    quark2PDG = quark2->getPDG();
+                    
+                    if(quarkvec.size() > 2){
+                        MCParticle* quark3 = quarkvec.at(2);
+                        MCParticle* quark4 = quarkvec.at(3);
+                        quark3PDG = quark3->getPDG();
+                        quark4PDG = quark4->getPDG();
+                    }
+                }
             }
-            
-            
-            for(int i = 0; i<4; i++){
-                cout<<"jet14m[i] : "<<jet14m[i]<<endl;
-                cout<<"jet24m[i] : "<<jet24m[i]<<endl;
-
-                cout<<"quark14m[i] : "<<quark14m[i]<<endl;
-                cout<<"quark24m[i] : "<<quark24m[i]<<endl;
-
-            }
-            
-            for(int i = 0; i<3; i++){
-                cout<<"lead1EndP[i] : "<<lead1EndP[i]<<endl;
-                cout<<"lead2EndP[i] : "<<lead2EndP[i]<<endl;
-            }
-            
-            cout<<"lead1PID : "<< lead1PID <<" lead2PID : "<<lead2PID<<endl;
             
 
         }catch (lcio::DataNotAvailableException err) {  }
@@ -536,5 +642,8 @@ void vcb2::end()
     }
     
 }
+
+
+
 
 

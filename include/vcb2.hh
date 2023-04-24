@@ -53,19 +53,33 @@ class vcb2  : public marlin::Processor
 		unsigned int eventNr;
 		int Num;
     
+    
+        double ratio15, ratio30, subratio15, subratio30;
+        double visEn, missPt, missM;
+        double leadMuonEn,  LeadElecEn, subleadMuonEn, leadPionEn, leadGammaEn;
+        int    multiplicity;
+    
+    int tauDecay;
+    
+    int jet1quark, jet2quark, num_jet, num_quark;
+    double angle1, angle2;
+    
+    double JetsInvMass, JetsRecoilMass;
     float HbbL[2], HccL[2];
     
-    float jet14m[4],   jet24m[4];
+    float jet14m[4], jet24m[4];
     float quark14m[4], quark24m[4];
-    float lead1HadEn, lead2HadEn;
-    int   lead1PID,   lead2PID;
-    float lead1EndP[3], lead2EndP[3];
-    int num_92BDaus;
-    
-    double thrust, Y12, Y23, Y34;
-    
-    int quark1PDG, quark2PDG;
+    double Y12, Y23, Y34;
 
+    
+    double jet1cosTheta, jet2cosTheta, jet1En, jet2En;
+    
+    int subleadMuonCharge, leadMuonCharge, chargeA;
+    
+    double leadMuonIMP, subleadMuonIMP, leadMcosTheta;
+    
+    int quark1PDG, quark2PDG, quark3PDG, quark4PDG;
+    double EnA, angleLA;
     
 
 		std::string _fileName;
