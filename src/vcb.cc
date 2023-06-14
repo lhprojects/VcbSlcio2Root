@@ -53,6 +53,12 @@ _output(0)
     
     _treeName="Tau";
     
+    _isoLepPDG = 13;
+    registerProcessorParameter("IsoLepPDG",
+                               "IsoLepPDG",
+                               _isoLepPDG,
+                               _isoLepPDG);
+
     registerProcessorParameter( "TreeName" ,
                                "The name of the ROOT tree" ,
                                _treeName ,
@@ -129,7 +135,7 @@ ReconstructedParticle *clone(ReconstructedParticle * pfo)
             }
         }
         return a_Reco;
-    } else if(false) {
+    } else if(true) {
         ReconstructedParticleImpl* a_Reco = new ReconstructedParticleImpl();
         // fields: need to copy
         // int _type{0} ;
@@ -176,10 +182,8 @@ ReconstructedParticle *clone(ReconstructedParticle * pfo)
         a_Reco->setStartVertex(a_Reco->getStartVertex());
 
         return a_Reco;
-    } else{
-        // do we really need to copy the obj?
-        return pfo;
     }
+   
 }
 
 struct Copy {
@@ -226,54 +230,38 @@ void vcb::processEvent( LCEvent * evtP )
     if (evtP)
     {
         Copy exclMuon(_outmcpsimufsp, _outMCPSIMURelation);
-        Copy exclElec(_outmcpsimufsp2, _outMCPSIMURelation2);
+        //Copy exclElec(_outmcpsimufsp2, _outMCPSIMURelation2);
 
         try {
             
             LCCollection* col_PFO = evtP->getCollection( "ArborPFOs" );
             int nPFO = col_PFO->getNumberOfElements();
-            cout<<"nPFO : "<< nPFO <<endl;
+            //cout<<"nPFO : "<< nPFO <<endl;
             
-            
-            std::vector<ReconstructedParticle*> vElec;
-            std::vector<ReconstructedParticle*> vMuon;
 
+            ReconstructedParticle* leadIsoLep = NULL;
+            double leadIsoLepEn = 0;
             for(int i = 0; i < nPFO; i++) {
                 ReconstructedParticle* pfo = dynamic_cast<ReconstructedParticle*>(col_PFO->getElementAt(i));
                 
-                int type = abs(pfo->getType());
-                if(type == 11){ vElec.push_back(pfo); }
-                if(type == 13){ vMuon.push_back(pfo); }
-                else {
-                    exclMuon.addPart(pfo);
-                    exclElec.addPart(pfo);
-                } 
-            }
-            
-
-            std::sort(vElec.begin(), vElec.end(), sortEn);
-            std::sort(vMuon.begin(), vMuon.end(), sortEn);
-            
-            for (int i = 0; i < (int)vMuon.size(); i++)
-            {
-                ReconstructedParticle *pfo = vMuon.at(i);
-                if(i != 0) {
-                    exclMuon.addPart(pfo);
+                if(_isoLepPDG == abs(pfo->getType()) ) {
+                    if(pfo->getEnergy() > leadIsoLepEn) {
+                        leadIsoLepEn = pfo->getEnergy();
+                        leadIsoLep = pfo;
+                        //std::cout << leadIsoLepEn << std::endl;
+                    }
                 }
-                exclElec.addPart(pfo);                
             }
-
-            for (int i = 0; i < (int)vElec.size(); i++)
-            {
-                ReconstructedParticle *pfo = vElec.at(i);
-                if(i != 0) {
-                    exclElec.addPart(pfo);
+    
+            for(int i = 0; i < nPFO; i++) {
+                ReconstructedParticle* pfo = dynamic_cast<ReconstructedParticle*>(col_PFO->getElementAt(i));
+                if(pfo != leadIsoLep) {
+                    exclMuon.addPart(pfo);                    
                 }
-                exclMuon.addPart(pfo);  
-            }           
+            }
 
             exclMuon.added2Evt(evtP);
-            exclElec.added2Evt(evtP);
+            //exclElec.added2Evt(evtP);
 
         } catch (lcio::DataNotAvailableException err) {
             printf("process %dth event error", Num);

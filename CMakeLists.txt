@@ -7,7 +7,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6 FATAL_ERROR)
 
 
 # project name
-PROJECT( Higgs2zz )
+PROJECT( VcbCreateRoot )
 
 # project version
 SET( ${PROJECT_NAME}_VERSION_MAJOR 0 )

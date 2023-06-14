@@ -41,10 +41,12 @@ class vcb  : public marlin::Processor
 		void end();
 
 	protected:
+		double _centerOfMassEnergy;
 		std::string _treeFileName;
 		std::string _treeName;
 		std::string _colName;
 		std::string _colAdcVals;
+		int _isoLepPDG;
 //		TFile *tree_file;
 
 		int _overwrite;
