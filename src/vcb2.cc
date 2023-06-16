@@ -133,11 +133,15 @@ void vcb2::setBranchAndValue(TTree *_outputTree_) {
     _outputTree->Branch("missPt", &missPt, "missPt/D");
     _outputTree->Branch("missM", &missM, "missM/D");
 
+
     _outputTree->Branch("LeadElecEn", &leadElecEn, "LeadElecEn/D"); leadElecEn = 0;
     _outputTree->Branch("leadMuonEn", &leadMuonEn, "leadMuonEn/D"); leadMuonEn = 0;
     _outputTree->Branch("leadPionEn", &leadPionEn, "leadPionEn/D"); leadPionEn = 0;
     _outputTree->Branch("leadGammaEn", &leadGammaEn, "leadGammaEn/D"); leadGammaEn = 0;
 
+
+    for(int i = 0; i < 4; ++i) leadLepM4[i] = 0;
+    _outputTree->Branch("leadLepM4", &leadLepM4, "leadLepM4[4]/F");
     _outputTree->Branch("leadLepEn", &leadLepEn, "leadLepEn/D"); leadLepEn = 0;
     _outputTree->Branch("leadLepCharge", &leadLepCharge, "leadLepCharge/D"); leadLepCharge = 999;
     _outputTree->Branch("leadD0", &leadD0, "leadD0/D"); leadD0 = 0;
@@ -147,6 +151,8 @@ void vcb2::setBranchAndValue(TTree *_outputTree_) {
     _outputTree->Branch("leadLepRatio15", &leadLepRatio15, "leadLepRatio15/D"); leadLepRatio15 = 0;
     _outputTree->Branch("leadLepRatio30", &leadLepRatio30, "leadLepRatio30/D"); leadLepRatio30 = 0;
 
+    for(int i = 0; i < 4; ++i) subleadLepM4[i] = 0;
+    _outputTree->Branch("subleadLepM4", &subleadLepM4, "subleadLepM4[4]/F");
     _outputTree->Branch("subleadLepEn", &subleadLepEn, "subleadLepEn/D"); subleadLepEn = 0;
     _outputTree->Branch("subleadLepCharge", &subleadLepCharge, "subeadLepCharge/D"); subleadLepCharge = 0;
     _outputTree->Branch("subleadD0", &subleadD0, "subleadD0/D"); subleadD0 = 0;
@@ -168,14 +174,16 @@ void vcb2::setBranchAndValue(TTree *_outputTree_) {
 
 
 
+    leadConePDG = 999;
     leadConeSubEn = 0;
     leadConeAngle = 999;
     leadConeTotalMass = 0;
     leadConeTotalRatio = 0;
+    _outputTree->Branch("leadConePDG", &leadConePDG, "leadConePDG/I");
     _outputTree->Branch("leadConeSubEn", &leadConeSubEn, "leadConeSubEn/D");
     _outputTree->Branch("leadConeAngle", &leadConeAngle, "leadConeAngle/D");
-    _outputTree->Branch("leadConeTotalMass", &leadConeTotalMass, "leadConeTotalMass/I");
-    _outputTree->Branch("leadConeTotalRatio", &leadConeTotalRatio, "leadConeTotalRatio/I");
+    _outputTree->Branch("leadConeTotalMass", &leadConeTotalMass, "leadConeTotalMass/D");
+    _outputTree->Branch("leadConeTotalRatio", &leadConeTotalRatio, "leadConeTotalRatio/D");
 
 
     sametypePairMass = 0;
@@ -703,6 +711,12 @@ ReconstructedParticle *vcb2::saveIsoLepton(std::vector<ReconstructedParticle *> 
     if (isoLeps.size() > 0)
     {
         leadLep = isoLeps.at(0);
+
+        leadLepM4[0] = leadLep->getMomentum()[0];
+        leadLepM4[1] = leadLep->getMomentum()[1];
+        leadLepM4[2] = leadLep->getMomentum()[2];
+        leadLepM4[3] = leadLep->getEnergy();
+
         TLorentzVector leadLepV4 = TLorentzVector(leadLep->getMomentum(), leadLep->getEnergy());
         leadLepEn = leadLep->getEnergy();
         leadLepCharge = leadLep->getCharge();
@@ -721,6 +735,12 @@ ReconstructedParticle *vcb2::saveIsoLepton(std::vector<ReconstructedParticle *> 
         if (isoLeps.size() > 1)
         {
             ReconstructedParticle *subleadLep = isoLeps.at(1);
+
+            subleadLepM4[0] = subleadLep->getMomentum()[0];
+            subleadLepM4[1] = subleadLep->getMomentum()[1];
+            subleadLepM4[2] = subleadLep->getMomentum()[2];
+            subleadLepM4[3] = subleadLep->getEnergy();
+
 
             subleadLepEn = subleadLep->getEnergy();
             subleadLepCharge = subleadLep->getCharge();
@@ -835,24 +855,34 @@ void vcb2::doProcessEvent(LCEvent *evtP)
         ReconstructedParticle* subleadCone = NULL;
         double maxEnergy = 0;
         TVector3 center = lorentzV4(leadLep).Vect();
-        for(int i = 0; i < (int)vElecMuon.size(); ++i) {
+        //for(int i = 0; i < (int)vElecMuon.size(); ++i) {
+        for(int i = 0; i < (int)col_PFO->getNumberOfElements(); ++i) {
 
-            ReconstructedParticle* part = vElecMuon.at(i);
-            if(center.Angle(lorentzV4(part).Vect()) < 30.0/180.0*3.1415926) {
-                if(part == leadLep) continue;
-                if(part->getEnergy() > maxEnergy) {
-                    maxEnergy = part->getEnergy();
-                    subleadCone =  part;
+            //ReconstructedParticle* part = vElecMuon.at(i);
+            ReconstructedParticle* part = 
+                dynamic_cast<ReconstructedParticle*>( col_PFO->getElementAt(i) );
+
+            if(part->getCharge() != 0) {
+                if(center.Angle(lorentzV4(part).Vect()) < 30.0/180.0*3.1415926) {
+                    if(part == leadLep) continue;
+                    if(part->getEnergy() > maxEnergy) {
+                        maxEnergy = part->getEnergy();
+                        subleadCone =  part;
+                    }
                 }
             }
         }
 
-        if(subleadCone && (subleadCone->getCharge() != leadLep->getCharge())
-            && (abs(subleadCone->getType()) == abs(leadLep->getType())) ) {
+        //if(subleadCone && (subleadCone->getCharge() != leadLep->getCharge())
+        //    && (abs(subleadCone->getType()) == abs(leadLep->getType())) ) {
+        cout << "subleadCone " << subleadCone << endl;
+        if(subleadCone && (subleadCone->getCharge() != leadLep->getCharge())) {
+
             double total_energy = energyInCone(leadLep, col_PFO, 30.);
-            
+            cout << "total energy " <<  total_energy << endl;
             leadConeSubEn = subleadCone->getEnergy();
             leadConeAngle = lorentzV4(subleadCone).Vect().Angle(center);
+            leadConePDG = subleadCone->getType();
             leadConeTotalMass = (lorentzV4(subleadCone) + lorentzV4(leadLep)).M();
             leadConeTotalRatio = (subleadCone->getEnergy() + leadLep->getEnergy()) / total_energy;
         }

@@ -100,6 +100,7 @@ class vcb2  : public marlin::Processor
 		double subleadLepRatio30;
 		double subleadLepCostheta;
 
+		int leadConePDG;
         double leadConeSubEn;
 		double leadConeAngle;
 		double leadConeTotalMass;
@@ -123,6 +124,9 @@ class vcb2  : public marlin::Processor
 	int jet1MCPDG, jet2MCPDG;
     float jet14m[4], jet24m[4];
     double Y12, Y23, Y34;
+
+	float leadLepM4[4];
+	float subleadLepM4[4];
 
 	int num_quark;
     double angle1, angle2;
