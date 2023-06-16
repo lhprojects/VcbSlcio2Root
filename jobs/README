@@ -1,0 +1,10 @@
+#
+
+run "./gen.py" to generate all jobs file you need
+
+inside the data:
+    use ./suball.sh to submit all jobs
+    use ./mergeall.sh to merge all small root file into several big root file
+    use ./copyroot.sh to copy these big root file into folder ./data/root
+
+
