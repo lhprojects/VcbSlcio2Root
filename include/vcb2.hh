@@ -17,6 +17,7 @@
 #include <IMPL/ReconstructedParticleImpl.h>
 #include <EVENT/MCParticle.h>
 #include <UTIL/LCRelationNavigator.h>
+#include "TLorentzVector.h"
 
 using namespace std ;
 using namespace lcio ;
@@ -42,6 +43,17 @@ class vcb2  : public marlin::Processor
 		void fillJets(LCCollection *col_Jet, std::vector<MCParticle*> &quarkvec);
 		void fillLeptons(std::vector<MCParticle*> &leptonvec);
 		ReconstructedParticle *saveIsoLepton(std::vector<ReconstructedParticle *> const &isoLeps, LCCollection *col_PFO);
+
+		void fillParticles(LCCollection *col_PFO,
+			std::vector<ReconstructedParticle *> &vElec,
+			std::vector<ReconstructedParticle *> &vMuon,
+			std::vector<ReconstructedParticle *> &vPion,
+			std::vector<ReconstructedParticle *> &vKaon,
+			std::vector<ReconstructedParticle *> &vProton,
+			std::vector<ReconstructedParticle *> &vGamma,
+			TLorentzVector &TLPFO
+			);
+
 		void end();
 
 	protected:
@@ -62,6 +74,11 @@ class vcb2  : public marlin::Processor
     
         double visEn, missPt, missM;
         int    multiplicity;
+
+		int nPFOs;
+		int nGoodPFOs;
+		int nChargedPFOs;
+		int nGoodChargedPFOs;
 
         double leadMuonEn,  leadElecEn, leadPionEn, leadGammaEn;
 
@@ -93,6 +110,7 @@ class vcb2  : public marlin::Processor
 		double difftypePairMass;
 		double sametypePairRecoilMass;
 		double difftypePairRecoilMass;
+
 
 
     int tauDecay;

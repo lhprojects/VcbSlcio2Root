@@ -114,11 +114,21 @@ void vcb2::setBranchAndValue(TTree *_outputTree_) {
     _outputTree->Branch("Num", &Num, "Num/I");
 
     multiplicity = 0;
+    nPFOs = 0;
+    nGoodPFOs = 0;
+    nChargedPFOs = 0;
+    nGoodChargedPFOs = 0;
+
     visEn = 0;
     missPt = 0;
     missM = 0;
 
     _outputTree->Branch("multiplicity", &multiplicity, "multiplicity/I");
+    _outputTree->Branch("nPFOs", &nPFOs, "nPFOs/I");
+    _outputTree->Branch("nGoodPFOs", &nGoodPFOs, "nGoodPFOs/I");
+    _outputTree->Branch("nChargedPFOs", &nChargedPFOs, "nChargedPFOs/I");
+    _outputTree->Branch("nGoodChargedPFOs", &nGoodChargedPFOs, "nGoodChargedPFOs/I");
+
     _outputTree->Branch("visEn", &visEn, "visEn/D");
     _outputTree->Branch("missPt", &missPt, "missPt/D");
     _outputTree->Branch("missM", &missM, "missM/D");
@@ -294,7 +304,28 @@ void updateSubLeadTrack(std::vector<ReconstructedParticle *> const &tracks,
 
 #endif
 
-void fillParticles(LCCollection *col_PFO,
+bool goodParticle(ReconstructedParticle *pfo) {
+    //int pdgid = abs(pfo->getType());
+    //if(pdgid == 11) return true;
+    //if(pdgid == 13) return true;
+    //if(pdgid == 22) return true;
+
+    if(pfo->getEnergy() > 0.5) {
+        return true;
+    }
+
+    //if(pdgid == 21120) return false;
+    //if(pdgid == 501) return false;
+    //if(pdgid == 21) return false;
+    //if(pdgid == 31) return false;
+    //if(pdgid == 20) return false;
+    //if(pdgid == 101) return false;
+    //if(pdgid == 1) return false;
+
+    return false;
+}
+
+void vcb2::fillParticles(LCCollection *col_PFO,
     std::vector<ReconstructedParticle *> &vElec,
     std::vector<ReconstructedParticle *> &vMuon,
     std::vector<ReconstructedParticle *> &vPion,
@@ -311,6 +342,20 @@ void fillParticles(LCCollection *col_PFO,
         TLorentzVector temp(pfo->getMomentum(), pfo->getEnergy());
         TLPFO += temp;
         int type = abs(pfo->getType());        
+
+        //cout << "charge         " << pfo->getCharge() << endl;
+        //cout << "pid    " << pfo->getType() << endl;
+        //cout << "energy " << pfo->getEnergy() << endl;
+        if(pfo->getCharge()) {
+            nChargedPFOs += 1;
+            if(goodParticle(pfo)) {
+                nGoodChargedPFOs += 1;
+            }
+        }
+        if(goodParticle(pfo)) {
+            nGoodPFOs += 1;
+        }
+
         if (type == 11)
         {
             vElec.push_back(pfo);
@@ -336,6 +381,14 @@ void fillParticles(LCCollection *col_PFO,
             vGamma.push_back(pfo);
         }
     }
+    //if(nPFO > 10){
+        //cout << "nChargedPFOs "  << nChargedPFOs << endl;
+        //cout << "nGoodChargedPFOs " << nGoodChargedPFOs << endl;
+        //cout << "nGoodPFOs " << nGoodPFOs << endl;
+        //cout << "nPFO " << nPFO << endl;
+        //getchar();
+    //}
+
 }
 
 
@@ -685,7 +738,6 @@ ReconstructedParticle *vcb2::saveIsoLepton(std::vector<ReconstructedParticle *> 
 }
 
 
-
 void vcb2::doProcessEvent(LCEvent *evtP)
  {
 
@@ -700,9 +752,6 @@ void vcb2::doProcessEvent(LCEvent *evtP)
     LCCollection *col_PFO = evtP->getCollection("ArborPFOs");
 
     int nPFO = col_PFO->getNumberOfElements();
-    cout << "nPFO : " << nPFO << endl;
-
-
 
     TLorentzVector TLPFO(0, 0, 0, 0);
     std::vector<ReconstructedParticle *> vElec;
@@ -718,7 +767,14 @@ void vcb2::doProcessEvent(LCEvent *evtP)
     visEn = TLPFO.E();
     missPt = (missV4.Vect()).Perp();
     missM = missV4.M();
+
     multiplicity = nPFO;
+    nPFOs = nPFO;
+
+    cout << "nChargedPFOs "  << nChargedPFOs << endl;
+    cout << "nGoodChargedPFOs " << nGoodChargedPFOs << endl;
+    cout << "nGoodPFOs " << nGoodPFOs << endl;
+    cout << "nPFO " << nPFO << endl;
 
     sort(vElec.begin(), vElec.end(), sortEn);
     sort(vMuon.begin(), vMuon.end(), sortEn);
