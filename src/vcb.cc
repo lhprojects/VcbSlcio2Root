@@ -164,9 +164,11 @@ ReconstructedParticle *clone(ReconstructedParticle * pfo)
         a_Reco->setParticleIDUsed(pfo->getParticleIDUsed());
         a_Reco->setGoodnessOfPID(pfo->getGoodnessOfPID());
         
-        for(unsigned i = 0; i < pfo->getParticleIDs().size(); ++i) {
-            a_Reco->addParticleID(pfo->getParticleIDs()[i]);
-        }
+        // cause problem sometimes ?
+        // need deep copy
+        //for(unsigned i = 0; i < pfo->getParticleIDs().size(); ++i) {
+        //    a_Reco->addParticleID(pfo->getParticleIDs()[i]);
+        //}
 
         for(unsigned i = 0; i < pfo->getParticles().size(); ++i) {
             a_Reco->addParticle(pfo->getParticles()[i]);

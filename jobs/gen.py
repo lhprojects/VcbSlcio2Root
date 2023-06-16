@@ -9,7 +9,7 @@ def append(d):
     if enable:
         data.append(d)
 
-enable=False
+enable=True
 append(('/cefs/data/DstData/CEPC240/CEPC_v4/4fermions/E240.Pzz_l.e0.p0.whizard195', [ 'zz_l0mumu',  'zz_l04mu',  'zz_l0taumu',  'zz_l04tau',  'zz_l0tautau',  ] ,492))
 append(('/cefs/data/DstData/CEPC240/CEPC_v4/4fermions/E240.Psznu_l.e0.p0.whizard195', [ 'sznu_l0mumu',  'sznu_l0tautau',  ] ,310))
 append(('/cefs/data/DstData/CEPC240/CEPC_v4/4fermions/E240.Pzzorww_h.e0.p0.whizard195', [ 'zzorww_h0cscs',  'zzorww_h0udud',  ] ,14118))
@@ -49,8 +49,17 @@ append(('/cefs/data/DstData/CEPC240/CEPC_v4/higgs/E240.Pe3e3h_X.e0.p0.whizard195
 append(('/cefs/data/DstData/CEPC240/CEPC_v4/higgs/E240.Pe1e1h_X.e0.p0.whizard195', [ 'e1e1h_X',  ] ,77))
 append(('/cefs/data/DstData/CEPC240/CEPC_v4/higgs/E240.Pnnh_X.e0.p0.whizard195', [ 'nnh_X',  ] ,439))
 
+allch=[]
+for (proc, chs, files) in data:
+    for ch in chs:
+        allch.append(ch)
 
+allch = sorted(allch)
+print(allch)
+print(len(allch))
+import sys
 import os
+
 def list_files_in_folder(folder_path):
     files = []
     for file_name in os.listdir(folder_path):
@@ -103,7 +112,7 @@ def genfor(proc, ch):
         writefile(jobfilename, job)
         os.system("chmod +x %s"%jobfilename)
        
-        if lastjobidx > 10 or True:
+        if lastjobidx > 10 and False:
             break
     
     subjobsh = "data/%s/SubJobs.sh"%ch

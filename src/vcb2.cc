@@ -416,6 +416,7 @@ void vcb2::fillLeptons(std::vector<MCParticle*> &leptonvec) {
     // store quarks if there are two quarks
     // ordered by jets, if there are two jets
     num_lepton = leptonvec.size();
+    cout << "num_lepton : " << num_lepton << endl;
     if (leptonvec.size() == 2)
     {
         MCParticle *quark1 = leptonvec.at(0);
@@ -537,6 +538,7 @@ std::vector<MCParticle*> &quarkvec)
     // store quarks if there are two quarks
     // ordered by jets, if there are two jets
     num_quark = quarkvec.size();
+    cout << "num_quark : " << num_quark << endl;
     if (quarkvec.size() == 2)
     {
         MCParticle *quark1 = quarkvec.at(0);
@@ -766,8 +768,8 @@ void vcb2::doProcessEvent(LCEvent *evtP)
     std::vector<ReconstructedParticle*> *homoset = &vElec;
     std::vector<ReconstructedParticle*> *heteset = &vMuon;
     std::vector<ReconstructedParticle*> vElecMuon;
-    vElecMuon.insert(vElecMuon.begin(), vElec.begin(), vElec.end());
-    vElecMuon.insert(vElecMuon.begin(), vMuon.begin(), vMuon.end());
+    vElecMuon.insert(vElecMuon.end(), vElec.begin(), vElec.end());
+    vElecMuon.insert(vElecMuon.end(), vMuon.begin(), vMuon.end());
 
     if(abs(_isoLepPDG) == 13) {
         std::swap(homoset, heteset);
@@ -779,7 +781,7 @@ void vcb2::doProcessEvent(LCEvent *evtP)
         TVector3 center = lorentzV4(leadLep).Vect();
         for(int i = 0; i < (int)vElecMuon.size(); ++i) {
 
-            ReconstructedParticle* part = vElecMuon.at(1);
+            ReconstructedParticle* part = vElecMuon.at(i);
             if(center.Angle(lorentzV4(part).Vect()) < 30.0/180.0*3.1415926) {
                 if(part == leadLep) continue;
                 if(part->getEnergy() > maxEnergy) {
@@ -829,7 +831,6 @@ void vcb2::doProcessEvent(LCEvent *evtP)
     LCCollection *col_Jet = evtP->getCollection("RefinedJets");
     fillJets(col_Jet, quarkvec);
     fillLeptons(leptonvec);
-
 }
 
 void vcb2::processEvent(LCEvent *evtP)
@@ -847,6 +848,7 @@ void vcb2::processEvent(LCEvent *evtP)
     // fill anyway!
     _outputTree->Fill();
     Num++;
+    cout << " ***** process event end ****" << endl;
 }
 
 void vcb2::end()
