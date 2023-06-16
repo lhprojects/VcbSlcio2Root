@@ -79,10 +79,11 @@ def writefile(filename, c):
 
 
 pwd = os.getcwd()
+df="data_test"
 
 def genfor(proc, ch):
     print(proc, ch)
-    os.system("mkdir -p data/%s"%ch)    
+    os.system("mkdir -p %s/%s"%(df,ch) )    
 
     filelist = list_files_in_folder(proc)
     filelist = [file for file in filelist if ch in file]
@@ -95,9 +96,9 @@ def genfor(proc, ch):
         filenames = "\n".join(group)
 
 
-        rootfilename = os.getcwd() + "/" + "data/%s/%s_%d.root"%(ch,ch, i)
-        xmlfilename = os.getcwd() + "/" + "data/%s/%s_%d.xml"%(ch,ch, i)
-        jobfilename = os.getcwd() + "/" + "data/%s/%s_%d.sh"%(ch,ch, i)
+        rootfilename = os.getcwd() + "/" + "%s/%s/%s_%d.root"%(df,ch,ch, i)
+        xmlfilename = os.getcwd() + "/" + "%s/%s/%s_%d.xml"%(df,ch,ch, i)
+        jobfilename = os.getcwd() + "/" + "%s/%s/%s_%d.sh"%(df,ch,ch, i)
 
 
         xml = readfile("SteerTemplate.xml")
@@ -115,18 +116,18 @@ def genfor(proc, ch):
         if lastjobidx > 10 and False:
             break
     
-    subjobsh = "data/%s/SubJobs.sh"%ch
-    mergesh = "data/%s/Merge.sh"%ch
-    rootfile = "%s/data/%s/%s.root"%(pwd,ch,ch)
+    subjobsh = "%s/%s/SubJobs.sh"%(df,ch)
+    mergesh = "%s/%s/Merge.sh"%(df,ch)
+    rootfile = "%s/%s/%s/%s.root"%(pwd, df, ch,ch)
 
-    writefile(subjobsh, "hep_sub %s -n %d"%(   os.getcwd() + "/data/%s/%s_%%{ProcId}.sh" % (ch,ch)         ,  lastjobidx  ))
+    writefile(subjobsh, "hep_sub %s -n %d"%(   os.getcwd() + "/%s/%s/%s_%%{ProcId}.sh" % (df,ch,ch)         ,  lastjobidx  ))
     os.system("chmod +x %s"%subjobsh)
-    writefile(mergesh, "hadd -f %s %s/data/%s/%s_*.root"%(rootfile,pwd,ch,ch)  )
+    writefile(mergesh, "hadd -f %s %s/%s/%s/%s_*.root"%(rootfile,pwd,df,ch,ch)  )
     os.system("chmod +x %s"%mergesh)
     return subjobsh, mergesh, rootfile
 
-os.system("mkdir -p data")
-os.system("mkdir -p data/root")
+os.system("mkdir -p %s"%df)
+os.system("mkdir -p %s/root"%df)
 mergeall = ""
 subjoball = ""
 copyroot=""
@@ -135,17 +136,17 @@ for (proc, chs, files) in data:
         subjobsh, mergesh, rootfile = genfor(proc, ch)
         mergeall +=  pwd + "/%s\n"%mergesh 
         subjoball +=  pwd + "/%s\n"%subjobsh
-        copyroot += "cp -rf %s %s/data/root\n"%(rootfile, pwd)
+        copyroot += "cp -rf %s %s/%s/root\n"%(rootfile, pwd, df)
 
-mergeallsh = "data/mergeall.sh"
+mergeallsh = "%s/mergeall.sh"%df
 writefile(mergeallsh, mergeall)
 os.system("chmod +x %s"%mergeallsh)
 
-subjoballsh = "data/suball.sh"
+subjoballsh = "%s/suball.sh"%df
 writefile(subjoballsh, subjoball)
 os.system("chmod +x %s"%subjoballsh)
 
-copyrootsh = "data/copyroot.sh"
+copyrootsh = "%s/copyroot.sh"%df
 writefile(copyrootsh, copyroot)
 os.system("chmod +x %s"%copyrootsh)
 
