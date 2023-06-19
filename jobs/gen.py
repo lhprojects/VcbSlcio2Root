@@ -1,7 +1,8 @@
 #!/bin/python
 
 prefix = "/cefs/data/DstData/CEPC240/CEPC_v4/"
-
+IsoLepPDG = 11
+df="data_e1_20230618"
 
 data=[]
 enable=True
@@ -79,7 +80,6 @@ def writefile(filename, c):
 
 
 pwd = os.getcwd()
-df="data_test"
 
 def genfor(proc, ch):
     print(proc, ch)
@@ -105,7 +105,7 @@ def genfor(proc, ch):
         xml = xml.replace("PLACEHOLDER_SCLIO", filenames)
         xml = xml.replace("PLACEHOLDER_ROOT", rootfilename)
         xml = xml.replace("PLACEHOLDER_CenterOfMassEnergy", "%f"%240.0)
-        xml = xml.replace("PLACEHOLDER_IsoLepPDG", "%d"%13)
+        xml = xml.replace("PLACEHOLDER_IsoLepPDG", "%d"%IsoLepPDG)
         writefile(xmlfilename, xml)
 
         job = readfile("JobTemplate.sh")

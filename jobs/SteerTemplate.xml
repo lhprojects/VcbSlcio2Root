@@ -76,6 +76,7 @@ $output_rootfile
   <!--Print MC Truth-->
   <!--If zero an already existing file will not be overwritten.-->
   <parameter name="OverwriteFile" type="int">1 </parameter>
+  <parameter name="IsoLepPDG" type="int"> PLACEHOLDER_IsoLepPDG </parameter>
     <!--The name of the file to which the ROOT tree will be written-->
       <parameter name="MCPSIMUFSP" type="string" lcioOutType="ReconstructedParticle"> jetParticles  </parameter>
       <parameter name="mcpsimurelation" type="string" lcioOutType="LCRelation"> MCPSIMURelation </parameter>
