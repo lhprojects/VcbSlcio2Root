@@ -1,8 +1,11 @@
 #!/bin/python
 
 prefix = "/cefs/data/DstData/CEPC240/CEPC_v4/"
-IsoLepPDG = 11
-df="data_e1_20230618"
+#IsoLepPDG = 11
+#df="data_e1_20230618"
+IsoLepPDG = 13
+df="data_20230617"
+rootfolder ="root2"
 
 data=[]
 enable=True
@@ -122,12 +125,12 @@ def genfor(proc, ch):
 
     writefile(subjobsh, "hep_sub %s -n %d"%(   os.getcwd() + "/%s/%s/%s_%%{ProcId}.sh" % (df,ch,ch)         ,  lastjobidx  ))
     os.system("chmod +x %s"%subjobsh)
-    writefile(mergesh, "hadd -f %s %s/%s/%s/%s_*.root"%(rootfile,pwd,df,ch,ch)  )
+    writefile(mergesh, "rm -f %s; hadd -f6 %s %s/%s/%s/%s_*.root"%(rootfile, rootfile,pwd,df,ch,ch)  )
     os.system("chmod +x %s"%mergesh)
     return subjobsh, mergesh, rootfile
 
 os.system("mkdir -p %s"%df)
-os.system("mkdir -p %s/root"%df)
+os.system("mkdir -p %s/%s"% (df, rootfolder) )
 mergeall = ""
 subjoball = ""
 copyroot=""
@@ -136,7 +139,7 @@ for (proc, chs, files) in data:
         subjobsh, mergesh, rootfile = genfor(proc, ch)
         mergeall +=  pwd + "/%s\n"%mergesh 
         subjoball +=  pwd + "/%s\n"%subjobsh
-        copyroot += "cp -rf %s %s/%s/root\n"%(rootfile, pwd, df)
+        copyroot += "cp -rf %s %s/%s/%s\n"%(rootfile, pwd, df, rootfolder)
 
 mergeallsh = "%s/mergeall.sh"%df
 writefile(mergeallsh, mergeall)
