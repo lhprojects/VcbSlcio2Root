@@ -727,12 +727,12 @@ void vcb2::fracInCone(ReconstructedParticle *part, LCCollection *col_PFO, bool l
                     if(type == 501) leadLepEn_501[i] += energy;
                     else if(type == 22) leadLepEn_22[i] += energy;
                     else if(type == 21120) leadLepEn_21120[i] += energy;
-                    else if(type != _isoLepPDG) leadLepEn_other[i] += energy;
+                    else if(abs(type) != _isoLepPDG) leadLepEn_other[i] += energy;
                 } else {
                     if(type == 501) subleadLepEn_501[i] += energy;
                     else if(type == 22) subleadLepEn_22[i] += energy;
                     else if(type == 21120) subleadLepEn_21120[i] += energy;
-                    else if(type != _isoLepPDG) subleadLepEn_other[i] += energy;
+                    else if(abs(type) != _isoLepPDG) subleadLepEn_other[i] += energy;
                 }
             }
         }
