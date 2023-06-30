@@ -3,9 +3,9 @@
 prefix = "/cefs/data/DstData/CEPC240/CEPC_v4/"
 #IsoLepPDG = 11
 #df="data_e1_20230618"
-IsoLepPDG = 13
-df="data_20230617"
-rootfolder ="root2"
+IsoLepPDG = 11
+df="data_e_20230629"
+rootfolder ="root"
 
 data=[]
 enable=True

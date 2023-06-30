@@ -129,49 +129,74 @@ void vcb2::setBranchAndValue(TTree *_outputTree_) {
     _outputTree->Branch("nChargedPFOs", &nChargedPFOs, "nChargedPFOs/I");
     _outputTree->Branch("nGoodChargedPFOs", &nGoodChargedPFOs, "nGoodChargedPFOs/I");
 
-    _outputTree->Branch("visEn", &visEn, "visEn/D");
-    _outputTree->Branch("missPt", &missPt, "missPt/D");
-    _outputTree->Branch("missM", &missM, "missM/D");
+    _outputTree->Branch("visEn", &visEn, "visEn/F");
+    _outputTree->Branch("missPt", &missPt, "missPt/F");
+    _outputTree->Branch("missM", &missM, "missM/F");
 
 
-    _outputTree->Branch("LeadElecEn", &leadElecEn, "LeadElecEn/D"); leadElecEn = 0;
-    _outputTree->Branch("leadMuonEn", &leadMuonEn, "leadMuonEn/D"); leadMuonEn = 0;
-    _outputTree->Branch("leadPionEn", &leadPionEn, "leadPionEn/D"); leadPionEn = 0;
-    _outputTree->Branch("leadGammaEn", &leadGammaEn, "leadGammaEn/D"); leadGammaEn = 0;
+    _outputTree->Branch("LeadElecEn", &leadElecEn, "LeadElecEn/F"); leadElecEn = 0;
+    _outputTree->Branch("leadMuonEn", &leadMuonEn, "leadMuonEn/F"); leadMuonEn = 0;
+    _outputTree->Branch("leadPionEn", &leadPionEn, "leadPionEn/F"); leadPionEn = 0;
+    _outputTree->Branch("leadGammaEn", &leadGammaEn, "leadGammaEn/F"); leadGammaEn = 0;
 
 
     for(int i = 0; i < 4; ++i) leadLepM4[i] = 0;
     _outputTree->Branch("leadLepM4", &leadLepM4, "leadLepM4[4]/F");
-    _outputTree->Branch("leadLepEn", &leadLepEn, "leadLepEn/D"); leadLepEn = 0;
-    _outputTree->Branch("leadLepCharge", &leadLepCharge, "leadLepCharge/D"); leadLepCharge = 999;
-    _outputTree->Branch("leadD0", &leadD0, "leadD0/D"); leadD0 = 0;
-    _outputTree->Branch("leadZ0", &leadZ0, "leadZ0/D"); leadZ0 = 0;
-    _outputTree->Branch("leadIMP", &leadIMP, "leadIMP/D"); leadIMP = 0;
-    _outputTree->Branch("leadLepCostheta", &leadLepCostheta, "leadLepCostheta/D"); leadLepCostheta= 999;
-    _outputTree->Branch("leadLepRatio15", &leadLepRatio15, "leadLepRatio15/D"); leadLepRatio15 = 0;
-    _outputTree->Branch("leadLepRatio30", &leadLepRatio30, "leadLepRatio30/D"); leadLepRatio30 = 0;
+    _outputTree->Branch("leadLepEn", &leadLepEn, "leadLepEn/F"); leadLepEn = 0;
+    _outputTree->Branch("leadLepCharge", &leadLepCharge, "leadLepCharge/F"); leadLepCharge = 999;
+    _outputTree->Branch("leadD0", &leadD0, "leadD0/F"); leadD0 = 0;
+    _outputTree->Branch("leadZ0", &leadZ0, "leadZ0/F"); leadZ0 = 0;
+    _outputTree->Branch("leadIMP", &leadIMP, "leadIMP/F"); leadIMP = 0;
+    _outputTree->Branch("leadLepCostheta", &leadLepCostheta, "leadLepCostheta/F"); leadLepCostheta= 999;
+    _outputTree->Branch("leadLepRatio15", &leadLepRatio15, "leadLepRatio15/F"); leadLepRatio15 = 0;
+    _outputTree->Branch("leadLepRatio30", &leadLepRatio30, "leadLepRatio30/F"); leadLepRatio30 = 0;
 
     for(int i = 0; i < 4; ++i) subleadLepM4[i] = 0;
+
     _outputTree->Branch("subleadLepM4", &subleadLepM4, "subleadLepM4[4]/F");
-    _outputTree->Branch("subleadLepEn", &subleadLepEn, "subleadLepEn/D"); subleadLepEn = 0;
-    _outputTree->Branch("subleadLepCharge", &subleadLepCharge, "subeadLepCharge/D"); subleadLepCharge = 0;
-    _outputTree->Branch("subleadD0", &subleadD0, "subleadD0/D"); subleadD0 = 0;
-    _outputTree->Branch("subleadZ0", &subleadZ0, "subleadZ0/D"); subleadZ0 = 0;
-    _outputTree->Branch("subleadIMP", &subleadIMP, "subleadIMP/D"); subleadIMP = 0;
-    _outputTree->Branch("subleadLepCostheta", &subleadLepCostheta, "subleadLepCostheta/D"); subleadLepCostheta = 0;
-    _outputTree->Branch("subleadLepRatio15", &subleadLepRatio15, "subleadLepRatio15/D"); subleadLepRatio15 = 0;
-    _outputTree->Branch("subleadLepRatio30", &subleadLepRatio30, "subleadLepRatio30/D"); subleadLepRatio30 = 0;
+
+    _outputTree->Branch("subleadLepEn", &subleadLepEn, "subleadLepEn/F"); subleadLepEn = 0;
+    _outputTree->Branch("subleadLepCharge", &subleadLepCharge, "subeadLepCharge/F"); subleadLepCharge = 0;
+    _outputTree->Branch("subleadD0", &subleadD0, "subleadD0/F"); subleadD0 = 0;
+    _outputTree->Branch("subleadZ0", &subleadZ0, "subleadZ0/F"); subleadZ0 = 0;
+    _outputTree->Branch("subleadIMP", &subleadIMP, "subleadIMP/F"); subleadIMP = 0;
+    _outputTree->Branch("subleadLepCostheta", &subleadLepCostheta, "subleadLepCostheta/F"); subleadLepCostheta = 0;
+    _outputTree->Branch("subleadLepRatio15", &subleadLepRatio15, "subleadLepRatio15/F"); subleadLepRatio15 = 0;
+    _outputTree->Branch("subleadLepRatio30", &subleadLepRatio30, "subleadLepRatio30/F"); subleadLepRatio30 = 0;
 
     _outputTree->Branch("num_jet", &num_jet, "num_jet/I"); num_jet = 0;
-    _outputTree->Branch("JetsInvMass", &JetsInvMass, "JetsInvMass/D"); JetsInvMass = 0;
-    _outputTree->Branch("JetsRecoilMass", &JetsRecoilMass, "JetsRecoilMass/D"); JetsRecoilMass = 0;
-    _outputTree->Branch("jet1cosTheta", &jet1cosTheta, "jet1cosTheta/D"); jet1cosTheta = 999;
-    _outputTree->Branch("jet2cosTheta", &jet2cosTheta, "jet2cosTheta/D"); jet2cosTheta = 999;
-    _outputTree->Branch("jet1En", &jet1En, "jet1En/D"); jet1En = 0;
-    _outputTree->Branch("jet2En", &jet2En, "jet2En/D"); jet2En = 0;
+    _outputTree->Branch("JetsInvMass", &JetsInvMass, "JetsInvMass/F"); JetsInvMass = 0;
+    _outputTree->Branch("JetsRecoilMass", &JetsRecoilMass, "JetsRecoilMass/F"); JetsRecoilMass = 0;
+    _outputTree->Branch("jet1cosTheta", &jet1cosTheta, "jet1cosTheta/F"); jet1cosTheta = 999;
+    _outputTree->Branch("jet2cosTheta", &jet2cosTheta, "jet2cosTheta/F"); jet2cosTheta = 999;
+    _outputTree->Branch("jet1En", &jet1En, "jet1En/F"); jet1En = 0;
+    _outputTree->Branch("jet2En", &jet2En, "jet2En/F"); jet2En = 0;
     _outputTree->Branch("jet1MCPDG", &jet1MCPDG, "jet1MCPDG/I"); jet1MCPDG = 999;
     _outputTree->Branch("jet2MCPDG", &jet2MCPDG, "jet2MCPDG/I"); jet2MCPDG = 999;
 
+
+
+    for (int i = 0; i < 5; ++i)
+    {
+        leadLepEn_501[i] = 0;
+        leadLepEn_22[i] = 0;
+        leadLepEn_21120[i] = 0;
+        leadLepEn_other[i] = 0;
+
+        subleadLepEn_501[i] = 0;
+        subleadLepEn_22[i] = 0;
+        subleadLepEn_21120[i] = 0;
+        subleadLepEn_other[i] = 0;
+    }
+    _outputTree->Branch("leadLepEn_501", &leadLepEn_501, "leadLepEn_501[5]/F");
+    _outputTree->Branch("leadLepEn_22", &leadLepEn_22, "leadLepEn_22[5]/F");
+    _outputTree->Branch("leadLepEn_21120", &leadLepEn_21120, "leadLepEn_21120[5]/F");
+    _outputTree->Branch("leadLepEn_other", &leadLepEn_other, "leadLepEn_other[5]/F");
+
+    _outputTree->Branch("subleadLepEn_501", &subleadLepEn_501, "subleadLepEn_501[5]/F");
+    _outputTree->Branch("subleadLepEn_22", &subleadLepEn_22, "subleadLepEn_22[5]/F");
+    _outputTree->Branch("subleadLepEn_21120", &subleadLepEn_21120, "subleadLepEn_21120[5]/F");
+    _outputTree->Branch("subleadLepEn_other", &subleadLepEn_other, "subleadLepEn_other[5]/F");
 
 
     leadConePDG = 999;
@@ -180,20 +205,20 @@ void vcb2::setBranchAndValue(TTree *_outputTree_) {
     leadConeTotalMass = 0;
     leadConeTotalRatio = 0;
     _outputTree->Branch("leadConePDG", &leadConePDG, "leadConePDG/I");
-    _outputTree->Branch("leadConeSubEn", &leadConeSubEn, "leadConeSubEn/D");
-    _outputTree->Branch("leadConeAngle", &leadConeAngle, "leadConeAngle/D");
-    _outputTree->Branch("leadConeTotalMass", &leadConeTotalMass, "leadConeTotalMass/D");
-    _outputTree->Branch("leadConeTotalRatio", &leadConeTotalRatio, "leadConeTotalRatio/D");
+    _outputTree->Branch("leadConeSubEn", &leadConeSubEn, "leadConeSubEn/F");
+    _outputTree->Branch("leadConeAngle", &leadConeAngle, "leadConeAngle/F");
+    _outputTree->Branch("leadConeTotalMass", &leadConeTotalMass, "leadConeTotalMass/F");
+    _outputTree->Branch("leadConeTotalRatio", &leadConeTotalRatio, "leadConeTotalRatio/F");
 
 
     sametypePairMass = 0;
     difftypePairMass = 0;
     sametypePairRecoilMass = 0;
     difftypePairRecoilMass = 0;
-    _outputTree->Branch("sametypePairMass", &sametypePairMass, "sametypePairMass/D"); 
-    _outputTree->Branch("difftypePairMass", &difftypePairMass, "difftypePairMass/D");
-    _outputTree->Branch("sametypePairRecoilMass", &sametypePairRecoilMass, "sametypePairRecoilMass/D"); 
-    _outputTree->Branch("difftypePairRecoilMass", &difftypePairRecoilMass, "difftypePairRecoilMass/D");
+    _outputTree->Branch("sametypePairMass", &sametypePairMass, "sametypePairMass/F"); 
+    _outputTree->Branch("difftypePairMass", &difftypePairMass, "difftypePairMass/F");
+    _outputTree->Branch("sametypePairRecoilMass", &sametypePairRecoilMass, "sametypePairRecoilMass/F"); 
+    _outputTree->Branch("difftypePairRecoilMass", &difftypePairRecoilMass, "difftypePairRecoilMass/F");
 
     tauDecay = 999;
     _outputTree->Branch("tauDecay", &tauDecay, "tauDecay/I");
@@ -208,9 +233,9 @@ void vcb2::setBranchAndValue(TTree *_outputTree_) {
 
 
     Y12 = 999, Y23 = 999, Y34 = 999;
-    _outputTree->Branch("Y12", &Y12, "Y12/D");
-    _outputTree->Branch("Y23", &Y23, "Y23/D");
-    _outputTree->Branch("Y34", &Y34, "Y34/D");
+    _outputTree->Branch("Y12", &Y12, "Y12/F");
+    _outputTree->Branch("Y23", &Y23, "Y23/F");
+    _outputTree->Branch("Y34", &Y34, "Y34/F");
 
     for (int i = 0; i < 4; i++)
     {
@@ -234,13 +259,12 @@ void vcb2::setBranchAndValue(TTree *_outputTree_) {
     quark2PDG = 999;
 
     _outputTree->Branch("num_quark", &num_quark, "num_quark/I");
-    _outputTree->Branch("angle1", &angle1, "angle1/D");
-    _outputTree->Branch("angle2", &angle2, "angle2/D");
+    _outputTree->Branch("angle1", &angle1, "angle1/F");
+    _outputTree->Branch("angle2", &angle2, "angle2/F");
     _outputTree->Branch("quark14m", &quark14m, "quark14m[4]/F");
     _outputTree->Branch("quark24m", &quark24m, "quark24m[4]/F");
     _outputTree->Branch("quark1PDG", &quark1PDG, "quark1PDG/I");
     _outputTree->Branch("quark2PDG", &quark2PDG, "quark2PDG/I");
-
 
     // quark 1 and quark 2
     num_lepton = 0;
@@ -256,6 +280,7 @@ void vcb2::setBranchAndValue(TTree *_outputTree_) {
     _outputTree->Branch("lepton24m", &lepton24m, "lepton24m[4]/F");
     _outputTree->Branch("lepton1PDG", &lepton1PDG, "lepton1PDG/I");
     _outputTree->Branch("lepton2PDG", &lepton2PDG, "lepton2PDG/I");
+
 
 }
 void vcb2::init()
@@ -679,6 +704,41 @@ void GetMCP(LCCollection *col_MCP, std::vector<MCParticle *> &quarkvec,
     }    
 }
 
+
+void vcb2::fracInCone(ReconstructedParticle *part, LCCollection *col_PFO, bool leading)
+{
+    int nPFO = col_PFO->getNumberOfElements();
+    TLorentzVector seedMuon(part->getMomentum(), part->getEnergy());
+    TVector3 seeMuonV3 = seedMuon.Vect();
+
+    for (int i = 0; i < nPFO; i++)
+    {
+        ReconstructedParticle *pfo = dynamic_cast<ReconstructedParticle *>(col_PFO->getElementAt(i));
+        TLorentzVector temp(pfo->getMomentum(), pfo->getEnergy());
+        TVector3 TVtemp = temp.Vect();
+
+        double angleInDegree = TVtemp.Angle(seeMuonV3)/3.1415926*180;        
+        double energy = pfo->getEnergy();
+        int type = pfo->getType();
+        double angles[5] = {1,2,3,5,30};
+        for(int i = 0; i < 5; ++i) {
+            if(angleInDegree < angles[i]) {
+                if(leading) {
+                    if(type == 501) leadLepEn_501[i] += energy;
+                    else if(type == 22) leadLepEn_22[i] += energy;
+                    else if(type == 21120) leadLepEn_21120[i] += energy;
+                    else if(type != _isoLepPDG) leadLepEn_other[i] += energy;
+                } else {
+                    if(type == 501) subleadLepEn_501[i] += energy;
+                    else if(type == 22) subleadLepEn_22[i] += energy;
+                    else if(type == 21120) subleadLepEn_21120[i] += energy;
+                    else if(type != _isoLepPDG) subleadLepEn_other[i] += energy;
+                }
+            }
+        }
+    }
+}
+
 double energyInCone(ReconstructedParticle *part, LCCollection *col_PFO, double angleDeg)
 {
     double enInCone = 0;
@@ -692,9 +752,11 @@ double energyInCone(ReconstructedParticle *part, LCCollection *col_PFO, double a
         TLorentzVector temp(pfo->getMomentum(), pfo->getEnergy());
         TVector3 TVtemp = temp.Vect();
 
-        if (TVtemp.Angle(seeMuonV3) < angleDeg / 180 * 3.1415)
+        double angleInDegree = TVtemp.Angle(seeMuonV3)/3.1415926*180;        
+        double energy = pfo->getEnergy();
+        if (angleInDegree < angleDeg)
         {
-            enInCone += pfo->getEnergy();
+            enInCone += energy;
         }
     }
     return enInCone;
@@ -731,6 +793,7 @@ ReconstructedParticle *vcb2::saveIsoLepton(std::vector<ReconstructedParticle *> 
 
         leadLepRatio15 = energyFraction(leadLep, col_PFO, 15.);
         leadLepRatio30 = energyFraction(leadLep, col_PFO, 30.);
+        fracInCone(leadLep, col_PFO, true);
 
         if (isoLeps.size() > 1)
         {
@@ -752,6 +815,7 @@ ReconstructedParticle *vcb2::saveIsoLepton(std::vector<ReconstructedParticle *> 
             }
             subleadLepRatio15 = energyFraction(subleadLep, col_PFO, 15.);
             subleadLepRatio30 = energyFraction(subleadLep, col_PFO, 30.);
+            fracInCone(subleadLep, col_PFO, false);
         }
     }
     return leadLep;
@@ -759,7 +823,7 @@ ReconstructedParticle *vcb2::saveIsoLepton(std::vector<ReconstructedParticle *> 
 
 
 void vcb2::doProcessEvent(LCEvent *evtP)
- {
+{
 
     setBranchAndValue(NULL); // default values
 
