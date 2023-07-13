@@ -50,6 +50,13 @@ vcb2::vcb2()
                                _treeFileName,
                                _treeFileName);
 
+    registerProcessorParameter("RecoCollectionName",
+                               "recoCollectionName",
+                               _recoCollectionName,
+                               std::string("ArborPFOs"));
+
+
+
     _treeName = "Evts";
     registerProcessorParameter("TreeName",
                                "The name of the ROOT tree",
@@ -86,6 +93,10 @@ TLorentzVector lorentzV4(MCParticle *mcp) {
 
 static bool sortEn(ReconstructedParticle *a1, ReconstructedParticle *a2)
 {
+    //if(!a1) cout << "a1 NUL!\n" << endl;
+    //if(!a2) cout << "a2 NUL!\n" << endl;
+    // cout << a1->getEnergy() << " " << a2->getEnergy() << endl;
+
     return a1->getEnergy() >= a2->getEnergy();
 }
 
@@ -528,11 +539,12 @@ void vcb2::fillLeptons(std::vector<MCParticle*> &leptonvec) {
     }
 }
 void vcb2::fillJets(LCCollection *col_Jet,
-std::vector<MCParticle*> &quarkvec)
+std::vector<MCParticle*> &quarkvec,
+bool lcfiplus = false)
 {
     if(col_Jet) {
         num_jet = col_Jet->getNumberOfElements();
-
+        cout << "num jets: " << num_jet << endl;
         TLorentzVector TLJets(0, 0, 0, 0);
         TLorentzVector TLCM(0, 0, 0, _centerOfMassEnergy);
 
@@ -543,7 +555,7 @@ std::vector<MCParticle*> &quarkvec)
         JetsInvMass = TLJets.M();
         JetsRecoilMass = (TLCM - TLJets).M();
 
-        if (num_jet >= 1)
+        if (num_jet >= 1 && lcfiplus)
         {
 
             PIDHandler pidh(col_Jet);
@@ -563,7 +575,36 @@ std::vector<MCParticle*> &quarkvec)
             cout << "Ys: " << Y12 << " " << Y23 << " " << Y34 << endl;
         }
 
-        if (num_jet == 2)
+        if(num_jet == 2) {
+            ReconstructedParticle *jet1 = dynamic_cast<ReconstructedParticle *>(col_Jet->getElementAt(0));
+            TLorentzVector TLjet1(jet1->getMomentum(), jet1->getEnergy());
+            TVector3 TVjet1 = TLjet1.Vect();
+            jet1cosTheta = TVjet1.CosTheta();
+            jet1En = jet1->getEnergy();
+            jet14m[0] = jet1->getMomentum()[0];
+            jet14m[1] = jet1->getMomentum()[1];
+            jet14m[2] = jet1->getMomentum()[2];
+            jet14m[3] = jet1->getEnergy();
+
+
+
+            ReconstructedParticle *jet2 = dynamic_cast<ReconstructedParticle *>(col_Jet->getElementAt(1));
+            TLorentzVector TLjet2(jet2->getMomentum(), jet2->getEnergy());
+            TVector3 TVjet2 = TLjet2.Vect();
+            jet2cosTheta = TVjet2.CosTheta();
+            jet2En = jet2->getEnergy();
+
+            jet24m[0] = jet2->getMomentum()[0];
+            jet24m[1] = jet2->getMomentum()[1];
+            jet24m[2] = jet2->getMomentum()[2];
+            jet24m[3] = jet2->getEnergy();
+
+            cout << "jet1En : " << jet1En << " jet2En " << jet2En << endl;
+
+
+        }
+
+        if (num_jet == 2 && lcfiplus)
         {
 
             PIDHandler pidh(col_Jet);
@@ -584,35 +625,14 @@ std::vector<MCParticle*> &quarkvec)
             double btag1 = pid1.getParameters()[ibtag];
             double ctag1 = pid1.getParameters()[ictag];
 
-            TLorentzVector TLjet1(jet1->getMomentum(), jet1->getEnergy());
-            TVector3 TVjet1 = TLjet1.Vect();
-            jet1cosTheta = TVjet1.CosTheta();
-            jet1En = jet1->getEnergy();
-            jet14m[0] = jet1->getMomentum()[0];
-            jet14m[1] = jet1->getMomentum()[1];
-            jet14m[2] = jet1->getMomentum()[2];
-            jet14m[3] = jet1->getEnergy();
-
             ReconstructedParticle *jet2 = dynamic_cast<ReconstructedParticle *>(col_Jet->getElementAt(1));
 
             const ParticleID &pid2 = pidh.getParticleID(jet2, algo);
             double btag2 = pid2.getParameters()[ibtag];
             double ctag2 = pid2.getParameters()[ictag];
 
-            TLorentzVector TLjet2(jet2->getMomentum(), jet2->getEnergy());
-            TVector3 TVjet2 = TLjet2.Vect();
-            jet2cosTheta = TVjet2.CosTheta();
-            jet2En = jet2->getEnergy();
-
-            jet24m[0] = jet2->getMomentum()[0];
-            jet24m[1] = jet2->getMomentum()[1];
-            jet24m[2] = jet2->getMomentum()[2];
-            jet24m[3] = jet2->getEnergy();
-
             cout << "btag1 : " << btag1 << " btag2 " << btag2 << endl;
             cout << "ctag1 : " << ctag1 << " ctag2 " << ctag2 << endl;
-            cout << "jet1cosTheta : " << jet1cosTheta << " " << jet1En << endl;
-            cout << "jet2cosTheta : " << jet2cosTheta << " " << jet2En << endl;
 
             HbbL[0] = btag1;
             HccL[0] = ctag1;
@@ -675,8 +695,9 @@ std::vector<MCParticle*> &quarkvec)
 }
 
 
-void GetMCP(LCCollection *col_MCP, std::vector<MCParticle *> &quarkvec,
-                                    std::vector<MCParticle *> &leptonvec)
+void GetMCP(LCCollection *col_MCP,
+            std::vector<MCParticle *> &quarkvec,
+            std::vector<MCParticle *> &leptonvec)
 {
     int n_MCP = col_MCP->getNumberOfElements();
     for (int i = 0; i < n_MCP; i++)
@@ -827,13 +848,13 @@ void vcb2::doProcessEvent(LCEvent *evtP)
 
     setBranchAndValue(NULL); // default values
 
-    cout << "Next Event *******************************************************************************************************" << endl;
+    cout << "Next Event ***********************************" << endl;
     eventNr = evtP->getEventNumber();
     cout << "eventNr : " << eventNr << " Num : " << Num << endl;
 
     TLorentzVector TLCM(0, 0, 0, _centerOfMassEnergy);
 
-    LCCollection *col_PFO = evtP->getCollection("ArborPFOs");
+    LCCollection *col_PFO = evtP->getCollection(_recoCollectionName);
 
     int nPFO = col_PFO->getNumberOfElements();
 
@@ -860,20 +881,29 @@ void vcb2::doProcessEvent(LCEvent *evtP)
     cout << "nGoodPFOs " << nGoodPFOs << endl;
     cout << "nPFO " << nPFO << endl;
 
-    sort(vElec.begin(), vElec.end(), sortEn);
-    sort(vMuon.begin(), vMuon.end(), sortEn);
-    sort(vPion.begin(), vPion.end(), sortEn);
-    sort(vKaon.begin(), vKaon.end(), sortEn);
-    sort(vProton.begin(), vProton.end(), sortEn);
-    sort(vGamma.begin(), vGamma.end(), sortEn);
 
     cout << "the total energy of PFOs is : " << TLPFO.E() << endl;
+    
     cout << "vElec.size() : " << vElec.size() << endl;
     cout << "vMuon.size() : " << vMuon.size() << endl;
     cout << "vPion.size() : " << vPion.size() << endl;
     cout << "vKaon.size() : " << vKaon.size() << endl;
     cout << "vProton.size() : " << vProton.size() << endl;
     cout << "vGamma.size() : " << vGamma.size() << endl;
+
+    sort(vElec.begin(), vElec.end(), sortEn);
+    sort(vMuon.begin(), vMuon.end(), sortEn);
+    sort(vPion.begin(), vPion.end(), sortEn);
+    sort(vKaon.begin(), vKaon.end(), sortEn);
+    sort(vProton.begin(), vProton.end(), sortEn);
+    if(false){
+        for(int i = 0; i < (int)vGamma.size(); ++i) {
+            cout << vGamma[i]->getEnergy() << endl;
+            //sort(vGamma.begin(), vGamma.end(), sortEn);
+        }
+    }
+    sort(vGamma.begin(), vGamma.end(), sortEn);
+    cout << ("7");
 
     if (vMuon.size() > 0)
     {
@@ -974,14 +1004,33 @@ void vcb2::doProcessEvent(LCEvent *evtP)
     std::vector<MCParticle *> quarkvec;
     std::vector<MCParticle *> leptonvec;
     GetMCP(col_MCP, quarkvec, leptonvec);
+    fillLeptons(leptonvec);
 
     TauDecayPDG(col_MCP, tauDecay);
     cout << "tauDecay: " << tauDecay << endl;
 
-    LCCollection *col_Jet = evtP->getCollection("RefinedJets");
-    fillJets(col_Jet, quarkvec);
-    fillLeptons(leptonvec);
-}
+    LCCollection *col_Jet = NULL;
+    try{
+        col_Jet = evtP->getCollection("RefinedJets");
+    } catch(...) {
+        cout << "no  RefinedJets" << endl;
+    }
+    if(col_Jet) {
+        fillJets(col_Jet, quarkvec, true);
+    }
+   
+    if(!col_Jet) {
+        try {
+            col_Jet = evtP->getCollection("FastJets");
+        } catch(...) {
+            cout << "no  FastJets" << endl;
+        }
+        if(col_Jet) 
+            fillJets(col_Jet, quarkvec, false); 
+        }
+ 
+    }
+
 
 void vcb2::processEvent(LCEvent *evtP)
 {

@@ -40,7 +40,7 @@ class vcb2  : public marlin::Processor
 
 		void processEvent( LCEvent * evtP );
 		void doProcessEvent( LCEvent * evtP );
-		void fillJets(LCCollection *col_Jet, std::vector<MCParticle*> &quarkvec);
+		void fillJets(LCCollection *col_Jet, std::vector<MCParticle*> &quarkvec, bool lcfiplus);
 		void fillLeptons(std::vector<MCParticle*> &leptonvec);
 		ReconstructedParticle *saveIsoLepton(std::vector<ReconstructedParticle *> const &isoLeps, LCCollection *col_PFO);
 		void fracInCone(ReconstructedParticle *part, LCCollection *col_PFO, bool leading);
@@ -57,6 +57,7 @@ class vcb2  : public marlin::Processor
 		void end();
 
 	protected:
+        std::string _recoCollectionName;
 		std::string _treeFileName;
 		std::string _treeName;
 		std::string _colName;

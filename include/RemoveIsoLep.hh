@@ -24,15 +24,15 @@ using namespace marlin ;
 
 class TTree;
 
-class vcb  : public marlin::Processor
+class RemoveIsoLep  : public marlin::Processor
 {
 	public:
 
-		Processor*  newProcessor() { return new vcb ; }
+		Processor*  newProcessor() { return new RemoveIsoLep ; }
 
-		vcb();
+		RemoveIsoLep();
 
-		~vcb() {};
+		~RemoveIsoLep() {};
 
 		void init();
 
@@ -43,7 +43,7 @@ class vcb  : public marlin::Processor
 	protected:
 		double _centerOfMassEnergy;
 		std::string _treeFileName;
-		std::string _treeName;
+		std::string _inputCollectionName;
 		std::string _colName;
 		std::string _colAdcVals;
 		int _isoLepPDG;
@@ -65,8 +65,6 @@ class vcb  : public marlin::Processor
     
         std::string _outmcpsimufsp;
         std::string _outMCPSIMURelation;
-        std::string _outmcpsimufsp2;
-        std::string _outMCPSIMURelation2;
     
 		std::string _fileName;
 		std::ostream *_output;

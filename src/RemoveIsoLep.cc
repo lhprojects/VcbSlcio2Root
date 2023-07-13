@@ -1,4 +1,4 @@
-#include <vcb.hh>
+#include <RemoveIsoLep.hh>
 #include <EVENT/LCCollection.h>
 #include <IMPL/LCCollectionVec.h>
 #include <EVENT/LCFloatVec.h>
@@ -35,23 +35,16 @@
 
 using namespace std;
 
-vcb a_vcb_instance;
+RemoveIsoLep a_vcb_instance;
 
 
-vcb::vcb()
-: Processor("vcb"),
+RemoveIsoLep::RemoveIsoLep()
+: Processor("RemoveIsoLep"),
 _output(0)
 {
     _description = "Print MC Truth" ;
     
-    _treeFileName="MCTruth.root";
     
-    registerProcessorParameter( "TreeOutputFile" ,
-                               "The name of the file to which the ROOT tree will be written" ,
-                               _treeFileName ,
-                               _treeFileName);
-    
-    _treeName="Tau";
     
     _isoLepPDG = 13;
     registerProcessorParameter("IsoLepPDG",
@@ -59,34 +52,24 @@ _output(0)
                                _isoLepPDG,
                                _isoLepPDG);
 
-    registerProcessorParameter( "TreeName" ,
-                               "The name of the ROOT tree" ,
-                               _treeName ,
-                               _treeName);
-    
+     registerOutputCollection( LCIO::RECONSTRUCTEDPARTICLE,
+                             "InputCollectionName",
+                             "input the final state particle after simulation",
+                             _inputCollectionName,
+                             std::string("ArborFPOs") );
+
+   
     registerOutputCollection( LCIO::RECONSTRUCTEDPARTICLE,
                              "MCPSIMUFSP",
                              "the final state particle after simulation",
                              _outmcpsimufsp,
                              std::string("ReconstructedParticle") );
 
-    registerOutputCollection( LCIO::RECONSTRUCTEDPARTICLE,
-                            "MCPSIMUFSP2",
-                            "the final state particle after simulation",
-                            _outmcpsimufsp2,
-                            std::string("ReconstructedParticle") );
-    
     registerOutputCollection( LCIO::LCRELATION,
                              "mcpsimurelation",
                              " relation between MCP and Reco after simulation",
                              _outMCPSIMURelation,
-                             std::string("RelationusedSed") );
-    
-        registerOutputCollection( LCIO::LCRELATION,
-                             "mcpsimurelation2",
-                             " relation between MCP and Reco after simulation",
-                             _outMCPSIMURelation2,
-                             std::string("RelationusedSed") );
+                             std::string("RelationusedSed") ); 
 
     _overwrite=0;
     registerProcessorParameter( "OverwriteFile" ,
@@ -98,17 +81,18 @@ _output(0)
 
 
 
-
 // from large to small
 struct SortEn {
     bool operator()(ReconstructedParticle const * a1, ReconstructedParticle const * a2) const{
+        if(!a1) cout << "a1 NULL" << endl;
+        if(!a2) cout << "a2 NULL" << endl;
         return a1->getEnergy() > a2->getEnergy();
     }
 };
 
 static SortEn sortEn;
 
-void vcb::init() {    
+void RemoveIsoLep::init() {    
     printParameters();
     Num = 0;
 }
@@ -226,7 +210,7 @@ struct Copy {
 
 };
 
-void vcb::processEvent( LCEvent * evtP )
+void RemoveIsoLep::processEvent( LCEvent * evtP )
 {
     
     if (evtP)
@@ -236,9 +220,9 @@ void vcb::processEvent( LCEvent * evtP )
 
         try {
             
-            LCCollection* col_PFO = evtP->getCollection( "ArborPFOs" );
+            LCCollection* col_PFO = evtP->getCollection( _inputCollectionName );
             int nPFO = col_PFO->getNumberOfElements();
-            //cout<<"nPFO : "<< nPFO <<endl;
+            cout<<"nPFO : "<< nPFO <<endl;
             
 
             ReconstructedParticle* leadIsoLep = NULL;
@@ -273,7 +257,7 @@ void vcb::processEvent( LCEvent * evtP )
     Num++;
 }
 
-void vcb::end()
+void RemoveIsoLep::end()
 {    
 }
 
